@@ -135,6 +135,27 @@
 
         <div id="secciones"></div>
 
+        <!-- NUEVA SECCIÓN: BENEFICIOS EVENTOS A HOTELES -->
+        <fieldset>
+            <legend>Beneficios Eventos a Hoteles</legend>
+            <div class="form-group">
+                <label for="beneficioHotel">Seleccione el beneficio:</label>
+                <select id="beneficioHotel" name="beneficioHotel">
+                    <option value="">Seleccione una opción...</option>
+                    <option value="Información de hoteles sedes en convocatoria">Información de los hoteles sedes en la convocatoria del evento en la sección de hospedaje.</option>
+                    <option value="Promoción de hotel sede en redes y emailing">Promoción del hotel sede en publicaciones específicas de hospedaje en emailing y redes sociales del evento.</option>
+                    <option value="Creación de contenido para redes sociales">Creación de contenido del hotel sede para redes sociales.</option>
+                    <option value="Sección especial en guía del atleta">Sección especial en la guía del atleta.</option>
+                    <option value="Logo en vallas en registro y evento">Logo en vallas en registro y evento.</option>
+                    <option value="Otros">Otros (especificar)</option>
+                </select>
+            </div>
+            <div class="form-group" id="grupoOtroBeneficio" style="display: none;">
+                <label for="otroBeneficio">Especifique el beneficio (Otros):</label>
+                <input type="text" id="otroBeneficio" name="otroBeneficio" placeholder="Escriba los detalles...">
+            </div>
+        </fieldset>
+
         <fieldset>
             <legend>Necesidades Especiales (opcional)</legend>
             <div class="form-group">
@@ -151,7 +172,6 @@
 </div>
 
 <script>
-    // URL de implementación web de tu Google Apps Script ya configurada
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwVXcPJm00gCF4l2emHcIu1tCfDJsEAOHlK5fH9f7me1DzL2y366x4z9GYsLDbsL12OQ/exec";
 
     const TIPOS = ["5 estrellas", "4 estrellas", "3 estrellas", "Business Class"];
@@ -209,6 +229,19 @@
 
     $("secciones").innerHTML = SECCIONES.map(renderSeccion).join("");
 
+    // Mostrar u ocultar campo "Otros" dinámicamente
+    $("beneficioHotel").addEventListener("change", function() {
+        const grupoOtro = $("grupoOtroBeneficio");
+        if (this.value === "Otros") {
+            grupoOtro.style.display = "block";
+            $("otroBeneficio").required = true;
+        } else {
+            grupoOtro.style.display = "none";
+            $("otroBeneficio").required = false;
+            $("otroBeneficio").value = "";
+        }
+    });
+
     const hoy = new Date().toLocaleDateString("en-CA");
     const aFecha = iso => new Date(iso + "T12:00:00");
 
@@ -247,7 +280,10 @@
 
     [evIni, evFin].forEach(el => el.addEventListener("change", refrescos[0]));
     refrescos.forEach(f => f());
-    form.addEventListener("reset", () => setTimeout(() => refrescos.forEach(f => f())));
+    form.addEventListener("reset", () => setTimeout(() => {
+        refrescos.forEach(f => f());
+        $("grupoOtroBeneficio").style.display = "none";
+    }));
 
     document.querySelectorAll('input[type="date"]').forEach(el =>
         el.addEventListener("click", () => { try { el.showPicker(); } catch (_) {} }));
@@ -286,6 +322,7 @@
                 body: JSON.stringify(datos)
             });
             form.reset();
+            $("grupoOtroBeneficio").style.display = "none";
             mostrarEstado("Solicitud enviada. Los datos fueron registrados.", "ok");
         } catch (err) {
             console.error("Error al enviar:", err);
