@@ -45,6 +45,7 @@
         }
         legend { font-weight: bold; color: var(--primary); padding: 0 10px; font-size: 16px; }
         .hint { font-size: 13px; color: #555; margin: 0 0 15px; }
+        .hint:empty { display: none; }
 
         .form-group { margin-bottom: 15px; }
         .row {
@@ -111,9 +112,15 @@
                 <label for="nombreOrganizador">Nombre del organizador</label>
                 <input type="text" id="nombreOrganizador" name="nombreOrganizador" required>
             </div>
-            <div class="form-group">
-                <label for="fechaEvento">Fecha del evento</label>
-                <input type="date" id="fechaEvento" name="fechaEvento" required>
+            <div class="row">
+                <div class="form-group">
+                    <label for="fechaEventoInicio">Fecha de inicio del evento</label>
+                    <input type="date" id="fechaEventoInicio" name="fechaEventoInicio" required>
+                </div>
+                <div class="form-group">
+                    <label for="fechaEventoFin">Fecha final del evento</label>
+                    <input type="date" id="fechaEventoFin" name="fechaEventoFin" required>
+                </div>
             </div>
             <div class="row">
                 <div class="form-group">
@@ -191,25 +198,68 @@
             <div class="row">
                 ${campo(p + "Habitaciones", "Cantidad de habitaciones",
                     `<input type="number" id="${p}Habitaciones" name="${p}Habitaciones" min="0" inputmode="numeric">`)}
-                ${campo(p + "Fechas", "Fechas / calendario",
-                    `<input type="text" id="${p}Fechas" name="${p}Fechas" placeholder="Ej. 5 calendario">`)}
                 ${campo(p + "Zona", "Zona",
                     `<input type="text" id="${p}Zona" name="${p}Zona" placeholder="Ej. Monterrey Centro">`)}
             </div>
+            <div class="row">
+                ${campo(p + "FechaInicio", "Inicio de hospedaje",
+                    `<input type="date" id="${p}FechaInicio" name="${p}FechaInicio">`)}
+                ${campo(p + "FechaFin", "Fin de hospedaje",
+                    `<input type="date" id="${p}FechaFin" name="${p}FechaFin">`)}
+            </div>
+            <p class="hint" id="${p}Noches" aria-live="polite"></p>
         </fieldset>`;
     }
 
     $("secciones").innerHTML = SECCIONES.map(renderSeccion).join("");
 
-    // Si eligen un tipo de hospedaje, la cantidad de habitaciones pasa a ser obligatoria
-    SECCIONES.forEach(({ prefijo: p }) => {
-        $(p + "Tipo").addEventListener("change", e => {
-            $(p + "Habitaciones").required = e.target.value !== "";
-        });
+    // ---------- Fechas (formato AAAA-MM-DD, hora local) ----------
+    const hoy = new Date().toLocaleDateString("en-CA");
+    const aFecha = iso => new Date(iso + "T12:00:00"); // mediodía: evita saltos por zona horaria
+
+    const sumarDias = (iso, n) => {
+        const d = aFecha(iso);
+        d.setDate(d.getDate() + n);
+        return d.toLocaleDateString("en-CA");
+    };
+    const noches = (ini, fin) => Math.round((aFecha(fin) - aFecha(ini)) / 864e5);
+
+    const refrescos = []; // funciones que recalculan mínimos y avisos (también tras reset)
+
+    // Evento: la fecha final puede ser el mismo día del inicio
+    const evIni = $("fechaEventoInicio");
+    const evFin = $("fechaEventoFin");
+    refrescos.push(() => {
+        evIni.min = hoy;
+        evFin.min = evIni.value || hoy;
     });
 
-    // No permitir fechas pasadas (fecha local, formato AAAA-MM-DD)
-    $("fechaEvento").min = new Date().toLocaleDateString("en-CA");
+    // Hospedaje: si eligen un tipo, se vuelven obligatorios habitaciones y fechas;
+    // el fin debe ser al menos un día después del inicio.
+    SECCIONES.forEach(({ prefijo: p }) => {
+        const tipo = $(p + "Tipo");
+        const ini = $(p + "FechaInicio");
+        const fin = $(p + "FechaFin");
+        const aviso = $(p + "Noches");
+
+        const actualizar = () => {
+            [$(p + "Habitaciones"), ini, fin].forEach(el => { el.required = tipo.value !== ""; });
+            ini.min = hoy;
+            fin.min = sumarDias(ini.value || hoy, 1);
+            const n = ini.value && fin.value && fin.value > ini.value ? noches(ini.value, fin.value) : 0;
+            aviso.textContent = n ? `${n} ${n === 1 ? "noche" : "noches"} de hospedaje` : "";
+        };
+        [tipo, ini, fin].forEach(el => el.addEventListener("change", actualizar));
+        refrescos.push(actualizar);
+    });
+
+    [evIni, evFin].forEach(el => el.addEventListener("change", refrescos[0]));
+    refrescos.forEach(f => f());
+    form.addEventListener("reset", () => setTimeout(() => refrescos.forEach(f => f())));
+
+    // Abrir el calendario al hacer clic en cualquier parte del campo de fecha
+    document.querySelectorAll('input[type="date"]').forEach(el =>
+        el.addEventListener("click", () => { try { el.showPicker(); } catch (_) {} }));
 
     function mostrarEstado(texto, tipo) {
         estado.textContent = texto;
@@ -227,6 +277,15 @@
             return mostrarEstado("Solicitud enviada.", "ok");
         }
         delete datos.sitioWeb;
+
+        // Campos derivados: se conservan fechaEvento y <prefijo>Fechas de la versión anterior
+        datos.fechaEvento = datos.fechaEventoInicio;
+        SECCIONES.forEach(({ prefijo: p }) => {
+            const ini = datos[p + "FechaInicio"];
+            const fin = datos[p + "FechaFin"];
+            datos[p + "Noches"] = ini && fin ? noches(ini, fin) : "";
+            datos[p + "Fechas"] = ini && fin ? `${ini} a ${fin}` : "";
+        });
 
         if (APPS_SCRIPT_URL.includes("TU_SCRIPT_ID_AQUI")) {
             return mostrarEstado("Falta configurar la URL del Apps Script.", "error");
