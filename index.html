@@ -6,17 +6,22 @@
     <title>Gestión de Hospedaje - OCV Monterrey</title>
     <style>
         :root {
-            --primary: #8c1d40;
-            --primary-dark: #701532;
-            --text: #333;
-            --muted: #666;
-            --bg: #f8f9fa;
-            --card: #fff;
-            --border: #ced4da;
-            --ok: #1e7b34;
-            --error: #b42318;
+            --primary: #8C1D40;       /* Rojo vino institucional OCV */
+            --primary-dark: #6e1531;
+            --accent-green: #7CB342;  /* Verde montaña OCV */
+            --accent-orange: #FB8C00; /* Naranja OCV */
+            --accent-blue: #0288D1;   /* Azul OCV */
+            --text: #2C3E50;
+            --muted: #7F8C8D;
+            --bg: #F4F6F9;
+            --card: #FFFFFF;
+            --border: #DCDDE1;
+            --ok: #27AE60;
+            --error: #C0392B;
         }
+
         *, *::before, *::after { box-sizing: border-box; }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--bg);
@@ -24,66 +29,128 @@
             margin: 0;
             padding: 20px;
         }
+
+        /* --- SPLASH SCREEN ANIMADO --- */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #FFFFFF;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+        #splash-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .splash-logo {
+            max-width: 240px;
+            height: auto;
+            animation: pulseLogo 1.5s infinite alternate;
+        }
+        .splash-loader {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            margin-top: 20px;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes pulseLogo {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            100% { transform: scale(1.05); opacity: 1; }
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- CONTENEDOR PRINCIPAL --- */
         .container {
-            max-width: 800px;
+            max-width: 820px;
             margin: 0 auto;
             background: var(--card);
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, .05);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border-top: 6px solid var(--primary);
         }
-        .header { text-align: center; margin-bottom: 30px; }
-        .header img { max-width: 180px; height: auto; margin-bottom: 15px; }
-        h1 { font-size: 24px; color: var(--primary); margin: 0 0 5px; }
-        .subtitle { color: var(--muted); font-size: 14px; margin: 0; }
+
+        .header { text-align: center; margin-bottom: 35px; }
+        .header img { max-width: 200px; height: auto; margin-bottom: 15px; }
+        h1 { font-size: 26px; color: var(--primary); margin: 0 0 8px; font-weight: 700; }
+        .subtitle { color: var(--muted); font-size: 15px; margin: 0; font-weight: 500; }
 
         fieldset {
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
+            border-radius: 10px;
+            padding: 24px;
             margin: 0 0 25px;
+            background: #FAFAFA;
         }
-        legend { font-weight: bold; color: var(--primary); padding: 0 10px; font-size: 16px; }
-        .hint { font-size: 13px; color: #555; margin: 0 0 15px; }
-        .hint:empty { display: none; }
-
-        .form-group { margin-bottom: 15px; }
-        .row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-            gap: 0 15px;
-        }
-        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px; }
-        input, select, textarea {
-            width: 100%;
-            padding: 10px;
+        legend {
+            font-weight: bold;
+            color: var(--primary);
+            padding: 0 12px;
+            font-size: 17px;
+            background: #FFF;
             border: 1px solid var(--border);
             border-radius: 6px;
+        }
+        .hint { font-size: 13px; color: var(--muted); margin: 0 0 15px; }
+        .hint:empty { display: none; }
+
+        .form-group { margin-bottom: 18px; }
+        .row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; color: #34495E; }
+        input, select, textarea {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
             font: inherit;
             font-size: 14px;
+            background: #FFF;
+            transition: all 0.3s ease;
         }
-        input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible {
+        input:focus-visible, select:focus-visible, textarea:focus-visible {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(140, 29, 64, .25);
+            box-shadow: 0 0 0 3px rgba(140, 29, 64, 0.15);
+            background: #FFF;
         }
 
         .btn-submit {
             width: 100%;
-            padding: 12px 20px;
+            padding: 14px 20px;
             font-size: 16px;
             font-weight: bold;
             color: #fff;
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             border: 0;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background .2s;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(140, 29, 64, 0.3);
         }
-        .btn-submit:hover:not(:disabled) { background: var(--primary-dark); }
-        .btn-submit:disabled { opacity: .6; cursor: wait; }
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(140, 29, 64, 0.4);
+        }
+        .btn-submit:disabled { opacity: 0.7; cursor: wait; }
 
-        .status { margin-top: 15px; font-weight: 600; text-align: center; }
+        .status { margin-top: 18px; font-weight: 600; text-align: center; font-size: 15px; }
         .status.ok { color: var(--ok); }
         .status.error { color: var(--error); }
 
@@ -92,246 +159,255 @@
 </head>
 <body>
 
-<div class="container">
-    <header class="header">
-        <img src="logotipo-ocv-monterrey.svg" alt="OCV Monterrey" width="180"
-             onerror="this.style.display='none'">
-        <h1>Formulario de Gestión de Hospedaje</h1>
-        <p class="subtitle">Oficina de Convenciones y Visitantes de Monterrey</p>
-    </header>
+    <!-- SPLASH SCREEN -->
+    <div id="splash-screen">
+        <img src="logotipo-ocv-monterrey.svg" alt="OCV Monterrey" class="splash-logo">
+        <div class="splash-loader"></div>
+    </div>
 
-    <form id="hospedajeForm" autocomplete="off">
-        <fieldset>
-            <legend>Información General del Evento</legend>
-            <div class="form-group">
-                <label for="nombreEvento">Nombre del evento</label>
-                <input type="text" id="nombreEvento" name="nombreEvento" required>
-            </div>
-            <div class="form-group">
-                <label for="nombreOrganizador">Nombre del organizador</label>
-                <input type="text" id="nombreOrganizador" name="nombreOrganizador" required>
-            </div>
-            <div class="row">
+    <div class="container">
+        <header class="header">
+            <img src="logotipo-ocv-monterrey.svg" alt="OCV Monterrey" onerror="this.style.display='none'">
+            <h1>Formulario de Gestión de Hospedaje</h1>
+            <p class="subtitle">Oficina de Convenciones y Visitantes de Monterrey</p>
+        </header>
+
+        <form id="hospedajeForm" autocomplete="off">
+            <fieldset>
+                <legend>Información General del Evento</legend>
                 <div class="form-group">
-                    <label for="fechaEventoInicio">Fecha de inicio del evento</label>
-                    <input type="date" id="fechaEventoInicio" name="fechaEventoInicio" required>
+                    <label for="nombreEvento">Nombre del evento</label>
+                    <input type="text" id="nombreEvento" name="nombreEvento" required placeholder="Ej. Congreso Nacional de Turismo">
                 </div>
                 <div class="form-group">
-                    <label for="fechaEventoFin">Fecha final del evento</label>
-                    <input type="date" id="fechaEventoFin" name="fechaEventoFin" required>
+                    <label for="nombreOrganizador">Nombre del organizador</label>
+                    <input type="text" id="nombreOrganizador" name="nombreOrganizador" required placeholder="Nombre de la empresa u organización">
                 </div>
-            </div>
-            <div class="row">
+                <div class="row">
+                    <div class="form-group">
+                        <label for="fechaEventoInicio">Fecha de inicio del evento</label>
+                        <input type="date" id="fechaEventoInicio" name="fechaEventoInicio" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="fechaEventoFin">Fecha final del evento</label>
+                        <input type="date" id="fechaEventoFin" name="fechaEventoFin" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="asistentesLocales">Asistentes esperados (locales)</label>
+                        <input type="number" id="asistentesLocales" name="asistentesLocales" min="0" inputmode="numeric" required placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="asistentesForaneos">Asistentes esperados (foráneos)</label>
+                        <input type="number" id="asistentesForaneos" name="asistentesForaneos" min="0" inputmode="numeric" required placeholder="0">
+                    </div>
+                </div>
+            </fieldset>
+
+            <div id="secciones"></div>
+
+            <fieldset>
+                <legend>Beneficios Eventos a Hoteles</legend>
                 <div class="form-group">
-                    <label for="asistentesLocales">Asistentes esperados (locales)</label>
-                    <input type="number" id="asistentesLocales" name="asistentesLocales" min="0" inputmode="numeric" required>
+                    <label for="beneficioHotel">Seleccione el beneficio:</label>
+                    <select id="beneficioHotel" name="beneficioHotel">
+                        <option value="">Seleccione una opción...</option>
+                        <option value="Información de hoteles sedes en convocatoria">Información de los hoteles sedes en la convocatoria del evento en la sección de hospedaje.</option>
+                        <option value="Promoción de hotel sede en redes y emailing">Promoción del hotel sede en publicaciones específicas de hospedaje en emailing y redes sociales del evento.</option>
+                        <option value="Creación de contenido para redes sociales">Creación de contenido del hotel sede para redes sociales.</option>
+                        <option value="Sección especial en guía del atleta">Sección especial en la guía del atleta.</option>
+                        <option value="Logo en vallas en registro y evento">Logo en vallas en registro y evento.</option>
+                        <option value="Otros">Otros (especificar)</option>
+                    </select>
                 </div>
+                <div class="form-group" id="grupoOtroBeneficio" style="display: none;">
+                    <label for="otroBeneficio">Especifique el beneficio (Otros):</label>
+                    <input type="text" id="otroBeneficio" name="otroBeneficio" placeholder="Escriba los detalles...">
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Necesidades Especiales (opcional)</legend>
                 <div class="form-group">
-                    <label for="asistentesForaneos">Asistentes esperados (foráneos)</label>
-                    <input type="number" id="asistentesForaneos" name="asistentesForaneos" min="0" inputmode="numeric" required>
+                    <label for="necesidadesEspeciales">Indique si requiere algún servicio especial</label>
+                    <textarea id="necesidadesEspeciales" name="necesidadesEspeciales" rows="3" placeholder="Detalles adicionales..."></textarea>
                 </div>
-            </div>
-        </fieldset>
+            </fieldset>
 
-        <div id="secciones"></div>
+            <input class="hp" type="text" name="sitioWeb" tabindex="-1" autocomplete="off" aria-hidden="true">
 
-        <!-- NUEVA SECCIÓN: BENEFICIOS EVENTOS A HOTELES -->
-        <fieldset>
-            <legend>Beneficios Eventos a Hoteles</legend>
-            <div class="form-group">
-                <label for="beneficioHotel">Seleccione el beneficio:</label>
-                <select id="beneficioHotel" name="beneficioHotel">
-                    <option value="">Seleccione una opción...</option>
-                    <option value="Información de hoteles sedes en convocatoria">Información de los hoteles sedes en la convocatoria del evento en la sección de hospedaje.</option>
-                    <option value="Promoción de hotel sede en redes y emailing">Promoción del hotel sede en publicaciones específicas de hospedaje en emailing y redes sociales del evento.</option>
-                    <option value="Creación de contenido para redes sociales">Creación de contenido del hotel sede para redes sociales.</option>
-                    <option value="Sección especial en guía del atleta">Sección especial en la guía del atleta.</option>
-                    <option value="Logo en vallas en registro y evento">Logo en vallas en registro y evento.</option>
-                    <option value="Otros">Otros (especificar)</option>
-                </select>
-            </div>
-            <div class="form-group" id="grupoOtroBeneficio" style="display: none;">
-                <label for="otroBeneficio">Especifique el beneficio (Otros):</label>
-                <input type="text" id="otroBeneficio" name="otroBeneficio" placeholder="Escriba los detalles...">
-            </div>
-        </fieldset>
+            <button type="submit" class="btn-submit" id="btnEnviar">Enviar solicitud</button>
+            <div id="estado" class="status" role="status" aria-live="polite"></div>
+        </form>
+    </div>
 
-        <fieldset>
-            <legend>Necesidades Especiales (opcional)</legend>
-            <div class="form-group">
-                <label for="necesidadesEspeciales">Indique si requiere algún servicio especial</label>
-                <textarea id="necesidadesEspeciales" name="necesidadesEspeciales" rows="3" placeholder="Detalles adicionales..."></textarea>
-            </div>
-        </fieldset>
-
-        <input class="hp" type="text" name="sitioWeb" tabindex="-1" autocomplete="off" aria-hidden="true">
-
-        <button type="submit" class="btn-submit" id="btnEnviar">Enviar solicitud</button>
-        <div id="estado" class="status" role="status" aria-live="polite"></div>
-    </form>
-</div>
-
-<script>
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwVXcPJm00gCF4l2emHcIu1tCfDJsEAOHlK5fH9f7me1DzL2y366x4z9GYsLDbsL12OQ/exec";
-
-    const TIPOS = ["5 estrellas", "4 estrellas", "3 estrellas", "Business Class"];
-
-    const SECCIONES = [
-        {
-            prefijo: "bloqueo",
-            titulo: "Hospedaje por Bloqueo Cerrado",
-            descripcion: "Compártanos la información de las habitaciones que serán reservadas directamente por el organizador.",
-            tarifaEjemplo: "2,500.00"
-        },
-        {
-            prefijo: "promo",
-            titulo: "Hospedaje para Participantes - Con Código Promocional",
-            descripcion: "Estas habitaciones serían ofrecidas al público en general de su evento.",
-            tarifaEjemplo: "6,000.00"
-        }
-    ];
-
-    const $ = id => document.getElementById(id);
-    const form = $("hospedajeForm");
-    const btn = $("btnEnviar");
-    const estado = $("estado");
-
-    const campo = (id, etiqueta, control) =>
-        `<div class="form-group"><label for="${id}">${etiqueta}</label>${control}</div>`;
-
-    function renderSeccion({ prefijo: p, titulo, descripcion, tarifaEjemplo }) {
-        const opciones = TIPOS.map(t => `<option value="${t}">${t}</option>`).join("");
-        return `
-        <fieldset>
-            <legend>${titulo}</legend>
-            <p class="hint">${descripcion}</p>
-            <div class="row">
-                ${campo(p + "Tipo", "Tipo de hospedaje",
-                    `<select id="${p}Tipo" name="${p}Tipo"><option value="">Seleccione...</option>${opciones}</select>`)}
-                ${campo(p + "Tarifa", "Tarifa ideal ($)",
-                    `<input type="text" id="${p}Tarifa" name="${p}Tarifa" inputmode="decimal" placeholder="Ej. ${tarifaEjemplo}">`)}
-            </div>
-            <div class="row">
-                ${campo(p + "Habitaciones", "Cantidad de habitaciones",
-                    `<input type="number" id="${p}Habitaciones" name="${p}Habitaciones" min="0" inputmode="numeric">`)}
-                ${campo(p + "Zona", "Zona",
-                    `<input type="text" id="${p}Zona" name="${p}Zona" placeholder="Ej. Monterrey Centro">`)}
-            </div>
-            <div class="row">
-                ${campo(p + "FechaInicio", "Inicio de hospedaje",
-                    `<input type="date" id="${p}FechaInicio" name="${p}FechaInicio">`)}
-                ${campo(p + "FechaFin", "Fin de hospedaje",
-                    `<input type="date" id="${p}FechaFin" name="${p}FechaFin">`)}
-            </div>
-            <p class="hint" id="${p}Noches" aria-live="polite"></p>
-        </fieldset>`;
-    }
-
-    $("secciones").innerHTML = SECCIONES.map(renderSeccion).join("");
-
-    // Mostrar u ocultar campo "Otros" dinámicamente
-    $("beneficioHotel").addEventListener("change", function() {
-        const grupoOtro = $("grupoOtroBeneficio");
-        if (this.value === "Otros") {
-            grupoOtro.style.display = "block";
-            $("otroBeneficio").required = true;
-        } else {
-            grupoOtro.style.display = "none";
-            $("otroBeneficio").required = false;
-            $("otroBeneficio").value = "";
-        }
-    });
-
-    const hoy = new Date().toLocaleDateString("en-CA");
-    const aFecha = iso => new Date(iso + "T12:00:00");
-
-    const sumarDias = (iso, n) => {
-        const d = aFecha(iso);
-        d.setDate(d.getDate() + n);
-        return d.toLocaleDateString("en-CA");
-    };
-    const noches = (ini, fin) => Math.round((aFecha(fin) - aFecha(ini)) / 864e5);
-
-    const refrescos = [];
-
-    const evIni = $("fechaEventoInicio");
-    const evFin = $("fechaEventoFin");
-    refrescos.push(() => {
-        evIni.min = hoy;
-        evFin.min = evIni.value || hoy;
-    });
-
-    SECCIONES.forEach(({ prefijo: p }) => {
-        const tipo = $(p + "Tipo");
-        const ini = $(p + "FechaInicio");
-        const fin = $(p + "FechaFin");
-        const aviso = $(p + "Noches");
-
-        const actualizar = () => {
-            [$(p + "Habitaciones"), ini, fin].forEach(el => { el.required = tipo.value !== ""; });
-            ini.min = hoy;
-            fin.min = sumarDias(ini.value || hoy, 1);
-            const n = ini.value && fin.value && fin.value > ini.value ? noches(ini.value, fin.value) : 0;
-            aviso.textContent = n ? `${n} ${n === 1 ? "noche" : "noches"} de hospedaje` : "";
-        };
-        [tipo, ini, fin].forEach(el => el.addEventListener("change", actualizar));
-        refrescos.push(actualizar);
-    });
-
-    [evIni, evFin].forEach(el => el.addEventListener("change", refrescos[0]));
-    refrescos.forEach(f => f());
-    form.addEventListener("reset", () => setTimeout(() => {
-        refrescos.forEach(f => f());
-        $("grupoOtroBeneficio").style.display = "none";
-    }));
-
-    document.querySelectorAll('input[type="date"]').forEach(el =>
-        el.addEventListener("click", () => { try { el.showPicker(); } catch (_) {} }));
-
-    function mostrarEstado(texto, tipo) {
-        estado.textContent = texto;
-        estado.className = "status " + tipo;
-    }
-
-    form.addEventListener("submit", async e => {
-        e.preventDefault();
-
-        const datos = Object.fromEntries(new FormData(form));
-
-        if (datos.sitioWeb) {
-            form.reset();
-            return mostrarEstado("Solicitud enviada.", "ok");
-        }
-        delete datos.sitioWeb;
-
-        datos.fechaEvento = datos.fechaEventoInicio;
-        SECCIONES.forEach(({ prefijo: p }) => {
-            const ini = datos[p + "FechaInicio"];
-            const fin = datos[p + "FechaFin"];
-            datos[p + "Noches"] = ini && fin ? noches(ini, fin) : "";
-            datos[p + "Fechas"] = ini && fin ? `${ini} a ${fin}` : "";
+    <script>
+        // Ocultar Splash Screen al cargar la página
+        window.addEventListener("load", () => {
+            setTimeout(() => {
+                document.getElementById("splash-screen").classList.add("hidden");
+            }, 500);
         });
 
-        btn.disabled = true;
-        mostrarEstado("Enviando información...", "");
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwVXcPJm00gCF4l2emHcIu1tCfDJsEAOHlK5fH9f7me1DzL2y366x4z9GYsLDbsL12OQ/exec";
 
-        try {
-            await fetch(APPS_SCRIPT_URL, {
-                method: "POST",
-                mode: "no-cors",
-                body: JSON.stringify(datos)
-            });
-            form.reset();
-            $("grupoOtroBeneficio").style.display = "none";
-            mostrarEstado("Solicitud enviada. Los datos fueron registrados.", "ok");
-        } catch (err) {
-            console.error("Error al enviar:", err);
-            mostrarEstado("No se pudo enviar el formulario. Revise su conexión e inténtelo de nuevo.", "error");
-        } finally {
-            btn.disabled = false;
+        const TIPOS = ["5 estrellas", "4 estrellas", "3 estrellas", "Business Class"];
+
+        const SECCIONES = [
+            {
+                prefijo: "bloqueo",
+                titulo: "Hospedaje por Bloqueo Cerrado",
+                descripcion: "Compártanos la información de las habitaciones que serán reservadas directamente por el organizador.",
+                tarifaEjemplo: "2,500.00"
+            },
+            {
+                prefijo: "promo",
+                titulo: "Hospedaje para Participantes - Con Código Promocional",
+                descripcion: "Estas habitaciones serían ofrecidas al público en general de su evento.",
+                tarifaEjemplo: "6,000.00"
+            }
+        ];
+
+        const $ = id => document.getElementById(id);
+        const form = $("hospedajeForm");
+        const btn = $("btnEnviar");
+        const estado = $("estado");
+
+        const campo = (id, etiqueta, control) =>
+            `<div class="form-group"><label for="${id}">${etiqueta}</label>${control}</div>`;
+
+        function renderSeccion({ prefijo: p, titulo, descripcion, tarifaEjemplo }) {
+            const opciones = TIPOS.map(t => `<option value="${t}">${t}</option>`).join("");
+            return `
+            <fieldset>
+                <legend>${titulo}</legend>
+                <p class="hint">${descripcion}</p>
+                <div class="row">
+                    ${campo(p + "Tipo", "Tipo de hospedaje",
+                        `<select id="${p}Tipo" name="${p}Tipo"><option value="">Seleccione...</option>${opciones}</select>`)}
+                    ${campo(p + "Tarifa", "Tarifa ideal ($)",
+                        `<input type="text" id="${p}Tarifa" name="${p}Tarifa" inputmode="decimal" placeholder="Ej. ${tarifaEjemplo}">`)}
+                </div>
+                <div class="row">
+                    ${campo(p + "Habitaciones", "Cantidad de habitaciones",
+                        `<input type="number" id="${p}Habitaciones" name="${p}Habitaciones" min="0" inputmode="numeric">`)}
+                    ${campo(p + "Zona", "Zona",
+                        `<input type="text" id="${p}Zona" name="${p}Zona" placeholder="Ej. Monterrey Centro">`)}
+                </div>
+                <div class="row">
+                    ${campo(p + "FechaInicio", "Inicio de hospedaje",
+                        `<input type="date" id="${p}FechaInicio" name="${p}FechaInicio">`)}
+                    ${campo(p + "FechaFin", "Fin de hospedaje",
+                        `<input type="date" id="${p}FechaFin" name="${p}FechaFin">`)}
+                </div>
+                <p class="hint" id="${p}Noches" aria-live="polite"></p>
+            </fieldset>`;
         }
-    });
-</script>
 
+        $("secciones").innerHTML = SECCIONES.map(renderSeccion).join("");
+
+        $("beneficioHotel").addEventListener("change", function() {
+            const grupoOtro = $("grupoOtroBeneficio");
+            if (this.value === "Otros") {
+                grupoOtro.style.display = "block";
+                $("otroBeneficio").required = true;
+            } else {
+                grupoOtro.style.display = "none";
+                $("otroBeneficio").required = false;
+                $("otroBeneficio").value = "";
+            }
+        });
+
+        const hoy = new Date().toLocaleDateString("en-CA");
+        const aFecha = iso => new Date(iso + "T12:00:00");
+
+        const sumarDias = (iso, n) => {
+            const d = aFecha(iso);
+            d.setDate(d.getDate() + n);
+            return d.toLocaleDateString("en-CA");
+        };
+        const noches = (ini, fin) => Math.round((aFecha(fin) - aFecha(ini)) / 864e5);
+
+        const refrescos = [];
+
+        const evIni = $("fechaEventoInicio");
+        const evFin = $("fechaEventoFin");
+        refrescos.push(() => {
+            evIni.min = hoy;
+            evFin.min = evIni.value || hoy;
+        });
+
+        SECCIONES.forEach(({ prefijo: p }) => {
+            const tipo = $(p + "Tipo");
+            const ini = $(p + "FechaInicio");
+            const fin = $(p + "FechaFin");
+            const aviso = $(p + "Noches");
+
+            const actualizar = () => {
+                [$(p + "Habitaciones"), ini, fin].forEach(el => { el.required = tipo.value !== ""; });
+                ini.min = hoy;
+                fin.min = sumarDias(ini.value || hoy, 1);
+                const n = ini.value && fin.value && fin.value > ini.value ? noches(ini.value, fin.value) : 0;
+                aviso.textContent = n ? `${n} ${n === 1 ? "noche" : "noches"} de hospedaje` : "";
+            };
+            [tipo, ini, fin].forEach(el => el.addEventListener("change", actualizar));
+            refrescos.push(actualizar);
+        });
+
+        [evIni, evFin].forEach(el => el.addEventListener("change", refrescos[0]));
+        refrescos.forEach(f => f());
+        form.addEventListener("reset", () => setTimeout(() => {
+            refrescos.forEach(f => f());
+            $("grupoOtroBeneficio").style.display = "none";
+        }));
+
+        document.querySelectorAll('input[type="date"]').forEach(el =>
+            el.addEventListener("click", () => { try { el.showPicker(); } catch (_) {} }));
+
+        function mostrarEstado(texto, tipo) {
+            estado.textContent = texto;
+            estado.className = "status " + tipo;
+        }
+
+        form.addEventListener("submit", async e => {
+            e.preventDefault();
+
+            const datos = Object.fromEntries(new FormData(form));
+
+            if (datos.sitioWeb) {
+                form.reset();
+                return mostrarEstado("Solicitud enviada.", "ok");
+            }
+            delete datos.sitioWeb;
+
+            datos.fechaEvento = datos.fechaEventoInicio;
+            SECCIONES.forEach(({ prefijo: p }) => {
+                const spinner = datos[p + "FechaInicio"];
+                const fin = datos[p + "FechaFin"];
+                datos[p + "Noches"] = spinner && fin ? noches(spinner, fin) : "";
+                datos[p + "Fechas"] = spinner && fin ? `${spinner} a ${fin}` : "";
+            });
+
+            btn.disabled = true;
+            mostrarEstado("Enviando información...", "");
+
+            try {
+                await fetch(APPS_SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    body: JSON.stringify(datos)
+                });
+                form.reset();
+                $("grupoOtroBeneficio").style.display = "none";
+                mostrarEstado("¡Solicitud enviada con éxito! Se ha notificado a OCV.", "ok");
+            } catch (err) {
+                console.error("Error al enviar:", err);
+                mostrarEstado("No se pudo enviar el formulario. Revise su conexión e inténtelo de nuevo.", "error");
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    </script>
 </body>
 </html>
