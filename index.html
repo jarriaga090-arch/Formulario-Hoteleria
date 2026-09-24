@@ -251,6 +251,7 @@
         const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwVXcPJm00gCF4l2emHcIu1tCfDJsEAOHlK5fH9f7me1DzL2y366x4z9GYsLDbsL12OQ/exec";
 
         const TIPOS = ["5 estrellas", "4 estrellas", "3 estrellas", "Business Class"];
+        const ZONAS = ["Monterrey Centro", "San Pedro", "Santiago", "Otro"];
 
         const SECCIONES = [
             {
@@ -276,14 +277,15 @@
             `<div class="form-group"><label for="${id}">${etiqueta}</label>${control}</div>`;
 
         function renderSeccion({ prefijo: p, titulo, descripcion, tarifaEjemplo }) {
-            const opciones = TIPOS.map(t => `<option value="${t}">${t}</option>`).join("");
+            const opcionesTipos = TIPOS.map(t => `<option value="${t}">${t}</option>`).join("");
+            const opcionesZonas = ZONAS.map(z => `<option value="${z}">${z}</option>`).join("");
             return `
             <fieldset>
                 <legend>${titulo}</legend>
                 <p class="hint">${descripcion}</p>
                 <div class="row">
                     ${campo(p + "Tipo", "Tipo de hospedaje",
-                        `<select id="${p}Tipo" name="${p}Tipo"><option value="">Seleccione...</option>${opciones}</select>`)}
+                        `<select id="${p}Tipo" name="${p}Tipo"><option value="">Seleccione...</option>${opcionesTipos}</select>`)}
                     ${campo(p + "Tarifa", "Tarifa ideal ($)",
                         `<input type="text" id="${p}Tarifa" name="${p}Tarifa" inputmode="decimal" placeholder="Ej. ${tarifaEjemplo}">`)}
                 </div>
@@ -291,7 +293,11 @@
                     ${campo(p + "Habitaciones", "Cantidad de habitaciones",
                         `<input type="number" id="${p}Habitaciones" name="${p}Habitaciones" min="0" inputmode="numeric">`)}
                     ${campo(p + "Zona", "Zona",
-                        `<input type="text" id="${p}Zona" name="${p}Zona" placeholder="Ej. Monterrey Centro">`)}
+                        `<select id="${p}Zona" name="${p}Zona"><option value="">Seleccione...</option>${opcionesZonas}</select>`)}
+                </div>
+                <div class="form-group" id="${p}GrupoOtraZona" style="display: none;">
+                    ${campo(p + "OtraZona", "Especifique otra zona",
+                        `<input type="text" id="${p}OtraZona" name="${p}OtraZona" placeholder="Escriba la zona...">`)}
                 </div>
                 <div class="row">
                     ${campo(p + "FechaInicio", "Inicio de hospedaje",
@@ -304,6 +310,24 @@
         }
 
         $("secciones").innerHTML = SECCIONES.map(renderSeccion).join("");
+
+        // Control dinámico de zonas (Otros)
+        SECCIONES.forEach(({ prefijo: p }) => {
+            const selectZona = $(p + "Zona");
+            const grupoOtra = $(p + "GrupoOtraZona");
+            const inputOtra = $(p + "OtraZona");
+
+            selectZona.addEventListener("change", function() {
+                if (this.value === "Otro") {
+                    grupoOtra.style.display = "block";
+                    inputOtra.required = true;
+                } else {
+                    grupoOtra.style.display = "none";
+                    inputOtra.required = false;
+                    inputOtra.value = "";
+                }
+            });
+        });
 
         $("beneficioHotel").addEventListener("change", function() {
             const grupoOtro = $("grupoOtroBeneficio");
@@ -358,6 +382,9 @@
         form.addEventListener("reset", () => setTimeout(() => {
             refrescos.forEach(f => f());
             $("grupoOtroBeneficio").style.display = "none";
+            SECCIONES.forEach(({ prefijo: p }) => {
+                $(p + "GrupoOtraZona").style.display = "none";
+            });
         }));
 
         document.querySelectorAll('input[type="date"]').forEach(el =>
@@ -385,6 +412,11 @@
                 const fin = datos[p + "FechaFin"];
                 datos[p + "Noches"] = spinner && fin ? noches(spinner, fin) : "";
                 datos[p + "Fechas"] = spinner && fin ? `${spinner} a ${fin}` : "";
+                
+                // Procesar zona si seleccionó "Otro"
+                if (datos[p + "Zona"] === "Otro" && datos[p + "OtraZona"]) {
+                    datos[p + "Zona"] = "Otro: " + datos[p + "OtraZona"];
+                }
             });
 
             btn.disabled = true;
@@ -398,6 +430,9 @@
                 });
                 form.reset();
                 $("grupoOtroBeneficio").style.display = "none";
+                SECCIONES.forEach(({ prefijo: p }) => {
+                    $(p + "GrupoOtraZona").style.display = "none";
+                });
                 mostrarEstado("¡Solicitud enviada con éxito! Se ha notificado a OCV.", "ok");
             } catch (err) {
                 console.error("Error al enviar:", err);
