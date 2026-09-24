@@ -2,293 +2,255 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Gestión de Hospedaje - OCV Monterrey</title>
     <style>
         :root {
-            --primary-color: #8c1d40;
-            --secondary-color: #333333;
-            --bg-color: #f8f9fa;
-            --card-bg: #ffffff;
-            --border-color: #ced4da;
+            --primary: #8c1d40;
+            --primary-dark: #701532;
+            --text: #333;
+            --muted: #666;
+            --bg: #f8f9fa;
+            --card: #fff;
+            --border: #ced4da;
+            --ok: #1e7b34;
+            --error: #b42318;
         }
+        *, *::before, *::after { box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--secondary-color);
+            background: var(--bg);
+            color: var(--text);
             margin: 0;
             padding: 20px;
         }
         .container {
             max-width: 800px;
             margin: 0 auto;
-            background: var(--card-bg);
+            background: var(--card);
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .05);
         }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .header img {
-            max-width: 180px;
-            margin-bottom: 15px;
-        }
-        h1 {
-            font-size: 24px;
-            color: var(--primary-color);
-            margin-bottom: 5px;
-        }
-        p.subtitle {
-            color: #666;
-            font-size: 14px;
-        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header img { max-width: 180px; height: auto; margin-bottom: 15px; }
+        h1 { font-size: 24px; color: var(--primary); margin: 0 0 5px; }
+        .subtitle { color: var(--muted); font-size: 14px; margin: 0; }
+
         fieldset {
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border);
             border-radius: 8px;
             padding: 20px;
-            margin-bottom: 25px;
-            background-color: #fff;
+            margin: 0 0 25px;
         }
-        legend {
-            font-weight: bold;
-            color: var(--primary-color);
-            padding: 0 10px;
-            font-size: 16px;
+        legend { font-weight: bold; color: var(--primary); padding: 0 10px; font-size: 16px; }
+        .hint { font-size: 13px; color: #555; margin: 0 0 15px; }
+
+        .form-group { margin-bottom: 15px; }
+        .row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 0 15px;
         }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        input[type="text"],
-        input[type="date"],
-        input[type="number"],
-        select,
-        textarea {
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px; }
+        input, select, textarea {
             width: 100%;
             padding: 10px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border);
             border-radius: 6px;
-            box-sizing: border-box;
+            font: inherit;
             font-size: 14px;
         }
-        input:focus, select:focus, textarea:focus {
+        input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible {
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(140, 29, 64, 0.1);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(140, 29, 64, .25);
         }
-        .row {
-            display: flex;
-            gap: 15px;
-        }
-        .row .form-group {
-            flex: 1;
-        }
+
         .btn-submit {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
+            width: 100%;
             padding: 12px 20px;
             font-size: 16px;
             font-weight: bold;
+            color: #fff;
+            background: var(--primary);
+            border: 0;
             border-radius: 6px;
             cursor: pointer;
-            width: 100%;
-            transition: background 0.2s;
+            transition: background .2s;
         }
-        .btn-submit:hover {
-            background-color: #701532;
-        }
-        #loading {
-            display: none;
-            text-align: center;
-            margin-top: 15px;
-            color: var(--primary-color);
-            font-weight: bold;
-        }
+        .btn-submit:hover:not(:disabled) { background: var(--primary-dark); }
+        .btn-submit:disabled { opacity: .6; cursor: wait; }
+
+        .status { margin-top: 15px; font-weight: 600; text-align: center; }
+        .status.ok { color: var(--ok); }
+        .status.error { color: var(--error); }
+
+        /* Campo trampa anti-spam: oculto para personas, visible para bots */
+        .hp { position: absolute; left: -9999px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header">
-        <!-- Reemplaza la ruta del logo con tu imagen o enlace subido -->
-        <img src="logotipo-ocv-monterrey.svg" alt="OCV Monterrey Logo">
+    <header class="header">
+        <img src="logotipo-ocv-monterrey.svg" alt="OCV Monterrey" width="180"
+             onerror="this.style.display='none'">
         <h1>Formulario de Gestión de Hospedaje</h1>
         <p class="subtitle">Oficina de Convenciones y Visitantes de Monterrey</p>
-    </div>
+    </header>
 
-    <form id="hospedajeForm">
-        <!-- Datos Generales -->
+    <form id="hospedajeForm" autocomplete="off">
         <fieldset>
             <legend>Información General del Evento</legend>
             <div class="form-group">
-                <label for="nombreEvento">Nombre del Evento:</label>
+                <label for="nombreEvento">Nombre del evento</label>
                 <input type="text" id="nombreEvento" name="nombreEvento" required>
             </div>
             <div class="form-group">
-                <label for="nombreOrganizador">Nombre del Organizador:</label>
+                <label for="nombreOrganizador">Nombre del organizador</label>
                 <input type="text" id="nombreOrganizador" name="nombreOrganizador" required>
             </div>
-            <div class="row">
-                <div class="form-group">
-                    <label for="fechaEvento">Fecha del Evento:</label>
-                    <input type="date" id="fechaEvento" name="fechaEvento" required>
-                </div>
-            </div>
-            <div class="row">
-                <div class="form-group">
-                    <label for="asistentesLocales">Asistentes Esperados (Locales):</label>
-                    <input type="number" id="asistentesLocales" name="asistentesLocales" min="0" required>
-                </div>
-                <div class="form-group">
-                    <label for="asistentesForaneos">Asistentes Esperados (Foráneos):</label>
-                    <input type="number" id="asistentesForaneos" name="asistentesForaneos" min="0" required>
-                </div>
-            </div>
-        </fieldset>
-
-        <!-- Hospedaje por Bloqueo Cerrado -->
-        <fieldset>
-            <legend>Hospedaje por Bloqueo Cerrado</legend>
-            <p style="font-size: 13px; color: #555; margin-top: 0;">Compartenos la info de las habitaciones que sean reservadas directamente por el organizador[cite: 1].</p>
-            <div class="row">
-                <div class="form-group">
-                    <label for="bloqueoTipo">Tipo de Hospedaje:</label>
-                    <select id="bloqueoTipo" name="bloqueoTipo">
-                        <option value="">Seleccione...</option>
-                        <option value="5 estrellas">5 estrellas</option>
-                        <option value="4 estrellas">4 estrellas</option>
-                        <option value="3 estrellas">3 estrellas</option>
-                        <option value="Business Class">Business Class</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="bloqueoTarifa">Tarifa ideal ($):</label>
-                    <input type="text" id="bloqueoTarifa" name="bloqueoTarifa" placeholder="Ej. 2,500.00">
-                </div>
-            </div>
-            <div class="row">
-                <div class="form-group">
-                    <label for="bloqueoHabitaciones">Cantidad de habitaciones:</label>
-                    <input type="number" id="bloqueoHabitaciones" name="bloqueoHabitaciones" min="0">
-                </div>
-                <div class="form-group">
-                    <label for="bloqueoFechas">Fechas / Calendario:</label>
-                    <input type="text" id="bloqueoFechas" name="bloqueoFechas" placeholder="Ej. 5 calendario">
-                </div>
-                <div class="form-group">
-                    <label for="bloqueoZona">Zona:</label>
-                    <input type="text" id="bloqueoZona" name="bloqueoZona" placeholder="Ej. Monterrey Centro">
-                </div>
-            </div>
-        </fieldset>
-
-        <!-- Hospedaje para Participantes - Con Código Promocional -->
-        <fieldset>
-            <legend>Hospedaje para Participantes - Con Código Promocional</legend>
-            <p style="font-size: 13px; color: #555; margin-top: 0;">Estas habitaciones serían ofrecidas al público en general de su evento[cite: 1].</p>
-            <div class="row">
-                <div class="form-group">
-                    <label for="promoTipo">Tipo de Hospedaje:</label>
-                    <select id="promoTipo" name="promoTipo">
-                        <option value="">Seleccione...</option>
-                        <option value="5 estrellas">5 estrellas</option>
-                        <option value="4 estrellas">4 estrellas</option>
-                        <option value="3 estrellas">3 estrellas</option>
-                        <option value="Business Class">Business Class</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="promoTarifa">Tarifa ideal ($):</label>
-                    <input type="text" id="promoTarifa" name="promoTarifa" placeholder="Ej. 6,000.00">
-                </div>
-            </div>
-            <div class="row">
-                <div class="form-group">
-                    <label for="promoHabitaciones">Cantidad de habitaciones:</label>
-                    <input type="number" id="promoHabitaciones" name="promoHabitaciones" min="0">
-                </div>
-                <div class="form-group">
-                    <label for="promoFechas">Fechas / Calendario:</label>
-                    <input type="text" id="promoFechas" name="promoFechas" placeholder="Ej. 5 calendario">
-                </div>
-                <div class="form-group">
-                    <label for="promoZona">Zona:</label>
-                    <input type="text" id="promoZona" name="promoZona" placeholder="Ej. Monterrey Centro">
-                </div>
-            </div>
-        </fieldset>
-
-        <!-- Necesidades Especiales -->
-        <fieldset>
-            <legend>Necesidades Especiales (Opcional)</legend>
             <div class="form-group">
-                <label for="necesidadesEspeciales">Indique si requiere algún requerimiento especial:</label>
+                <label for="fechaEvento">Fecha del evento</label>
+                <input type="date" id="fechaEvento" name="fechaEvento" required>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label for="asistentesLocales">Asistentes esperados (locales)</label>
+                    <input type="number" id="asistentesLocales" name="asistentesLocales" min="0" inputmode="numeric" required>
+                </div>
+                <div class="form-group">
+                    <label for="asistentesForaneos">Asistentes esperados (foráneos)</label>
+                    <input type="number" id="asistentesForaneos" name="asistentesForaneos" min="0" inputmode="numeric" required>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Las dos secciones de hospedaje se generan desde SECCIONES (ver script) -->
+        <div id="secciones"></div>
+
+        <fieldset>
+            <legend>Necesidades Especiales (opcional)</legend>
+            <div class="form-group">
+                <label for="necesidadesEspeciales">Indique si requiere algún servicio especial</label>
                 <textarea id="necesidadesEspeciales" name="necesidadesEspeciales" rows="3" placeholder="Detalles adicionales..."></textarea>
             </div>
         </fieldset>
 
-        <button type="submit" class="btn-submit">Enviar Solicitud</button>
-        <div id="loading">Enviando información... Por favor espere.</div>
+        <input class="hp" type="text" name="sitioWeb" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+        <button type="submit" class="btn-submit" id="btnEnviar">Enviar solicitud</button>
+        <div id="estado" class="status" role="status" aria-live="polite"></div>
     </form>
 </div>
 
 <script>
-    // REEMPLAZA ESTA URL con la URL de implementación web de tu Google Apps Script
+    // Reemplaza con la URL de implementación web de tu Google Apps Script
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/TU_SCRIPT_ID_AQUI/exec";
 
-    document.getElementById('hospedajeForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        document.getElementById('loading').style.display = 'block';
-        
-        const formData = {
-            nombreEvento: document.getElementById('nombreEvento').value,
-            nombreOrganizador: document.getElementById('nombreOrganizador').value,
-            fechaEvento: document.getElementById('fechaEvento').value,
-            asistentesLocales: document.getElementById('asistentesLocales').value,
-            asistentesForaneos: document.getElementById('asistentesForaneos').value,
-            
-            bloqueoTipo: document.getElementById('bloqueoTipo').value,
-            bloqueoTarifa: document.getElementById('bloqueoTarifa').value,
-            bloqueoHabitaciones: document.getElementById('bloqueoHabitaciones').value,
-            bloqueoFechas: document.getElementById('bloqueoFechas').value,
-            bloqueoZona: document.getElementById('bloqueoZona').value,
-            
-            promoTipo: document.getElementById('promoTipo').value,
-            promoTarifa: document.getElementById('promoTarifa').value,
-            promoHabitaciones: document.getElementById('promoHabitaciones').value,
-            promoFechas: document.getElementById('promoFechas').value,
-            promoZona: document.getElementById('promoZona').value,
-            
-            necesidadesEspeciales: document.getElementById('necesidadesEspeciales').value
-        };
+    const TIPOS = ["5 estrellas", "4 estrellas", "3 estrellas", "Business Class"];
 
-        fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors', // Requerido para llamadas simples a Apps Script
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        })
-        .then(() => {
-            document.getElementById('loading').style.display = 'none';
-            alert('¡Formulario enviado con éxito! Los datos han sido registrados y notificados.');
-            document.getElementById('hospedajeForm').reset();
-        })
-        .catch(error => {
-            document.getElementById('loading').style.display = 'none';
-            console.error('Error:', error);
-            alert('Hubo un error al enviar el formulario. Inténtalo de nuevo.');
+    // Los prefijos generan los mismos nombres de campo de siempre
+    // (bloqueoTipo, promoTarifa, etc.), así el Apps Script no cambia.
+    const SECCIONES = [
+        {
+            prefijo: "bloqueo",
+            titulo: "Hospedaje por Bloqueo Cerrado",
+            descripcion: "Compártanos la información de las habitaciones que serán reservadas directamente por el organizador.",
+            tarifaEjemplo: "2,500.00"
+        },
+        {
+            prefijo: "promo",
+            titulo: "Hospedaje para Participantes - Con Código Promocional",
+            descripcion: "Estas habitaciones serían ofrecidas al público en general de su evento.",
+            tarifaEjemplo: "6,000.00"
+        }
+    ];
+
+    const $ = id => document.getElementById(id);
+    const form = $("hospedajeForm");
+    const btn = $("btnEnviar");
+    const estado = $("estado");
+
+    const campo = (id, etiqueta, control) =>
+        `<div class="form-group"><label for="${id}">${etiqueta}</label>${control}</div>`;
+
+    function renderSeccion({ prefijo: p, titulo, descripcion, tarifaEjemplo }) {
+        const opciones = TIPOS.map(t => `<option value="${t}">${t}</option>`).join("");
+        return `
+        <fieldset>
+            <legend>${titulo}</legend>
+            <p class="hint">${descripcion}</p>
+            <div class="row">
+                ${campo(p + "Tipo", "Tipo de hospedaje",
+                    `<select id="${p}Tipo" name="${p}Tipo"><option value="">Seleccione...</option>${opciones}</select>`)}
+                ${campo(p + "Tarifa", "Tarifa ideal ($)",
+                    `<input type="text" id="${p}Tarifa" name="${p}Tarifa" inputmode="decimal" placeholder="Ej. ${tarifaEjemplo}">`)}
+            </div>
+            <div class="row">
+                ${campo(p + "Habitaciones", "Cantidad de habitaciones",
+                    `<input type="number" id="${p}Habitaciones" name="${p}Habitaciones" min="0" inputmode="numeric">`)}
+                ${campo(p + "Fechas", "Fechas / calendario",
+                    `<input type="text" id="${p}Fechas" name="${p}Fechas" placeholder="Ej. 5 calendario">`)}
+                ${campo(p + "Zona", "Zona",
+                    `<input type="text" id="${p}Zona" name="${p}Zona" placeholder="Ej. Monterrey Centro">`)}
+            </div>
+        </fieldset>`;
+    }
+
+    $("secciones").innerHTML = SECCIONES.map(renderSeccion).join("");
+
+    // Si eligen un tipo de hospedaje, la cantidad de habitaciones pasa a ser obligatoria
+    SECCIONES.forEach(({ prefijo: p }) => {
+        $(p + "Tipo").addEventListener("change", e => {
+            $(p + "Habitaciones").required = e.target.value !== "";
         });
+    });
+
+    // No permitir fechas pasadas (fecha local, formato AAAA-MM-DD)
+    $("fechaEvento").min = new Date().toLocaleDateString("en-CA");
+
+    function mostrarEstado(texto, tipo) {
+        estado.textContent = texto;
+        estado.className = "status " + tipo;
+    }
+
+    form.addEventListener("submit", async e => {
+        e.preventDefault();
+
+        const datos = Object.fromEntries(new FormData(form));
+
+        // Honeypot: si un bot llena el campo oculto, se simula éxito sin enviar
+        if (datos.sitioWeb) {
+            form.reset();
+            return mostrarEstado("Solicitud enviada.", "ok");
+        }
+        delete datos.sitioWeb;
+
+        if (APPS_SCRIPT_URL.includes("TU_SCRIPT_ID_AQUI")) {
+            return mostrarEstado("Falta configurar la URL del Apps Script.", "error");
+        }
+
+        btn.disabled = true;
+        mostrarEstado("Enviando información...", "");
+
+        try {
+            // Sin cabecera Content-Type: con no-cors se envía como text/plain,
+            // y Apps Script lee el JSON desde e.postData.contents.
+            await fetch(APPS_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                body: JSON.stringify(datos)
+            });
+            form.reset();
+            mostrarEstado("Solicitud enviada. Los datos fueron registrados.", "ok");
+        } catch (err) {
+            console.error("Error al enviar:", err);
+            mostrarEstado("No se pudo enviar el formulario. Revise su conexión e inténtelo de nuevo.", "error");
+        } finally {
+            btn.disabled = false;
+        }
     });
 </script>
 
