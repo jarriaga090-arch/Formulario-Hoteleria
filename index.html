@@ -6,11 +6,10 @@
     <title>Gestión de Hospedaje - OCV Monterrey</title>
     <style>
         :root {
-            --primary: #8C1D40;       /* Rojo vino institucional OCV */
-            --primary-dark: #6e1531;
-            --accent-green: #7CB342;  /* Verde montaña OCV */
-            --accent-orange: #FB8C00; /* Naranja OCV */
-            --accent-blue: #0288D1;   /* Azul OCV */
+            --primary: #FB8C00;       /* Naranja OCV corporativo */
+            --primary-dark: #E65100;  /* Naranja oscuro para hover */
+            --accent-green: #7CB342;  
+            --accent-blue: #0288D1;   
             --text: #2C3E50;
             --muted: #7F8C8D;
             --bg: #F4F6F9;
@@ -127,7 +126,7 @@
         input:focus-visible, select:focus-visible, textarea:focus-visible {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(140, 29, 64, 0.15);
+            box-shadow: 0 0 0 3px rgba(251, 140, 0, 0.2);
             background: #FFF;
         }
 
@@ -142,11 +141,11 @@
             border-radius: 8px;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 15px rgba(140, 29, 64, 0.3);
+            box-shadow: 0 4px 15px rgba(251, 140, 0, 0.3);
         }
         .btn-submit:hover:not(:disabled) {
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(140, 29, 64, 0.4);
+            box-shadow: 0 6px 20px rgba(251, 140, 0, 0.4);
         }
         .btn-submit:disabled { opacity: 0.7; cursor: wait; }
 
@@ -243,7 +242,6 @@
     </div>
 
     <script>
-        // Ocultar Splash Screen al cargar la página
         window.addEventListener("load", () => {
             setTimeout(() => {
                 document.getElementById("splash-screen").classList.add("hidden");
