@@ -87,7 +87,6 @@
         .status.ok { color: var(--ok); }
         .status.error { color: var(--error); }
 
-        /* Campo trampa anti-spam: oculto para personas, visible para bots */
         .hp { position: absolute; left: -9999px; }
     </style>
 </head>
@@ -134,7 +133,6 @@
             </div>
         </fieldset>
 
-        <!-- Las dos secciones de hospedaje se generan desde SECCIONES (ver script) -->
         <div id="secciones"></div>
 
         <fieldset>
@@ -153,13 +151,11 @@
 </div>
 
 <script>
-    // Reemplaza con la URL de implementación web de tu Google Apps Script
+    // URL de implementación web de tu Google Apps Script ya configurada
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwVXcPJm00gCF4l2emHcIu1tCfDJsEAOHlK5fH9f7me1DzL2y366x4z9GYsLDbsL12OQ/exec";
 
     const TIPOS = ["5 estrellas", "4 estrellas", "3 estrellas", "Business Class"];
 
-    // Los prefijos generan los mismos nombres de campo de siempre
-    // (bloqueoTipo, promoTarifa, etc.), así el Apps Script no cambia.
     const SECCIONES = [
         {
             prefijo: "bloqueo",
@@ -213,9 +209,8 @@
 
     $("secciones").innerHTML = SECCIONES.map(renderSeccion).join("");
 
-    // ---------- Fechas (formato AAAA-MM-DD, hora local) ----------
     const hoy = new Date().toLocaleDateString("en-CA");
-    const aFecha = iso => new Date(iso + "T12:00:00"); // mediodía: evita saltos por zona horaria
+    const aFecha = iso => new Date(iso + "T12:00:00");
 
     const sumarDias = (iso, n) => {
         const d = aFecha(iso);
@@ -224,9 +219,8 @@
     };
     const noches = (ini, fin) => Math.round((aFecha(fin) - aFecha(ini)) / 864e5);
 
-    const refrescos = []; // funciones que recalculan mínimos y avisos (también tras reset)
+    const refrescos = [];
 
-    // Evento: la fecha final puede ser el mismo día del inicio
     const evIni = $("fechaEventoInicio");
     const evFin = $("fechaEventoFin");
     refrescos.push(() => {
@@ -234,8 +228,6 @@
         evFin.min = evIni.value || hoy;
     });
 
-    // Hospedaje: si eligen un tipo, se vuelven obligatorios habitaciones y fechas;
-    // el fin debe ser al menos un día después del inicio.
     SECCIONES.forEach(({ prefijo: p }) => {
         const tipo = $(p + "Tipo");
         const ini = $(p + "FechaInicio");
@@ -257,7 +249,6 @@
     refrescos.forEach(f => f());
     form.addEventListener("reset", () => setTimeout(() => refrescos.forEach(f => f())));
 
-    // Abrir el calendario al hacer clic en cualquier parte del campo de fecha
     document.querySelectorAll('input[type="date"]').forEach(el =>
         el.addEventListener("click", () => { try { el.showPicker(); } catch (_) {} }));
 
@@ -271,14 +262,12 @@
 
         const datos = Object.fromEntries(new FormData(form));
 
-        // Honeypot: si un bot llena el campo oculto, se simula éxito sin enviar
         if (datos.sitioWeb) {
             form.reset();
             return mostrarEstado("Solicitud enviada.", "ok");
         }
         delete datos.sitioWeb;
 
-        // Campos derivados: se conservan fechaEvento y <prefijo>Fechas de la versión anterior
         datos.fechaEvento = datos.fechaEventoInicio;
         SECCIONES.forEach(({ prefijo: p }) => {
             const ini = datos[p + "FechaInicio"];
@@ -287,16 +276,10 @@
             datos[p + "Fechas"] = ini && fin ? `${ini} a ${fin}` : "";
         });
 
-        if (APPS_SCRIPT_URL.includes("TU_SCRIPT_ID_AQUI")) {
-            return mostrarEstado("Falta configurar la URL del Apps Script.", "error");
-        }
-
         btn.disabled = true;
         mostrarEstado("Enviando información...", "");
 
         try {
-            // Sin cabecera Content-Type: con no-cors se envía como text/plain,
-            // y Apps Script lee el JSON desde e.postData.contents.
             await fetch(APPS_SCRIPT_URL, {
                 method: "POST",
                 mode: "no-cors",
