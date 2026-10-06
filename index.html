@@ -154,6 +154,7 @@
         .status.error { color: var(--error); }
 
         .hp { position: absolute; left: -9999px; }
+        .seccion-dinamica { display: none; }
     </style>
 </head>
 <body>
@@ -204,39 +205,67 @@
                 </div>
             </fieldset>
 
-            <div id="secciones"></div>
+            <!-- SECCIÓN 1: FORMULARIO PRINCIPAL (Para 3500 o más foráneos) -->
+            <div id="bloqueHospedajeCompleto" class="seccion-dinamica">
+                <div id="secciones"></div>
+            </div>
 
-            <fieldset>
-                <legend>Beneficios Eventos a Hoteles</legend>
-                <div class="form-group">
-                    <label for="beneficioHotel">Seleccione el beneficio:</label>
-                    <select id="beneficioHotel" name="beneficioHotel">
-                        <option value="">Seleccione una opción...</option>
-                        <option value="Información de hoteles sedes en convocatoria">Información de los hoteles sedes en la convocatoria del evento en la sección de hospedaje.</option>
-                        <option value="Promoción de hotel sede en redes y emailing">Promoción del hotel sede en publicaciones específicas de hospedaje en emailing y redes sociales del evento.</option>
-                        <option value="Creación de contenido para redes sociales">Creación de contenido del hotel sede para redes sociales.</option>
-                        <option value="Sección especial en guía del atleta">Sección especial en la guía del atleta.</option>
-                        <option value="Logo en vallas en registro y evento">Logo en vallas en registro y evento.</option>
-                        <option value="Otros">Otros (especificar)</option>
-                    </select>
-                </div>
-                <div class="form-group" id="grupoOtroBeneficio" style="display: none;">
-                    <label for="otroBeneficio">Especifique el beneficio (Otros):</label>
-                    <input type="text" id="otroBeneficio" name="otroBeneficio" placeholder="Escriba los detalles...">
-                </div>
-            </fieldset>
+            <!-- SECCIÓN 2: FORMULARIO ALTERNATIVO (Para menos de 3500 foráneos) -->
+            <div id="bloqueFormularioAlternativo" class="seccion-dinamica">
+                <fieldset>
+                    <legend>Detalles del Recinto</legend>
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="numeroSalas">Número de salas</label>
+                            <input type="number" id="numeroSalas" name="numeroSalas" min="0" inputmode="numeric" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="metrosCuadrados">Metros cuadrados</label>
+                            <input type="number" id="metrosCuadrados" name="metrosCuadrados" min="0" inputmode="numeric" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="numeroPersonas">Número de personas</label>
+                            <input type="number" id="numeroPersonas" name="numeroPersonas" min="0" inputmode="numeric" placeholder="0">
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
 
-            <fieldset>
-                <legend>Necesidades Especiales (opcional)</legend>
-                <div class="form-group">
-                    <label for="necesidadesEspeciales">Indique si requiere algún servicio especial</label>
-                    <textarea id="necesidadesEspeciales" name="necesidadesEspeciales" rows="3" placeholder="Detalles adicionales..."></textarea>
-                </div>
-            </fieldset>
+            <!-- BENEFICIOS Y NECESIDADES (Comunes o adaptables) -->
+            <div id="bloqueComun" class="seccion-dinamica">
+                <fieldset>
+                    <legend>Beneficios Eventos a Hoteles</legend>
+                    <div class="form-group">
+                        <label for="beneficioHotel">Seleccione el beneficio:</label>
+                        <select id="beneficioHotel" name="beneficioHotel">
+                            <option value="">Seleccione una opción...</option>
+                            <option value="Información de hoteles sedes en convocatoria">Información de los hoteles sedes en la convocatoria del evento en la sección de hospedaje.</option>
+                            <option value="Promoción de hotel sede en redes y emailing">Promoción del hotel sede en publicaciones específicas de hospedaje en emailing y redes sociales del evento.</option>
+                            <option value="Creación de contenido para redes sociales">Creación de contenido del hotel sede para redes sociales.</option>
+                            <option value="Sección especial en guía del atleta">Sección especial en la guía del atleta.</option>
+                            <option value="Logo en vallas en registro y evento">Logo en vallas en registro y evento.</option>
+                            <option value="Otros">Otros (especificar)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="grupoOtroBeneficio" style="display: none;">
+                        <label for="otroBeneficio">Especifique el beneficio (Otros):</label>
+                        <input type="text" id="otroBeneficio" name="otroBeneficio" placeholder="Escriba los detalles...">
+                    </div>
+                </fieldset>
 
-            <input class="hp" type="text" name="sitioWeb" tabindex="-1" autocomplete="off" aria-hidden="true">
+                <fieldset>
+                    <legend>Necesidades Especiales (opcional)</legend>
+                    <div class="form-group">
+                        <label for="necesidadesEspeciales">Indique si requiere algún servicio especial</label>
+                        <textarea id="necesidadesEspeciales" name="necesidadesEspeciales" rows="3" placeholder="Detalles adicionales..."></textarea>
+                    </div>
+                </fieldset>
 
-            <button type="submit" class="btn-submit" id="btnEnviar">Enviar solicitud</button>
+                <input class="hp" type="text" name="sitioWeb" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+                <button type="submit" class="btn-submit" id="btnEnviar">Enviar solicitud</button>
+            </div>
+
             <div id="estado" class="status" role="status" aria-live="polite"></div>
         </form>
     </div>
@@ -341,6 +370,43 @@
             }
         });
 
+        // Lógica condicional según Asistentes Foráneos
+        const asistentesForaneosInput = $("data-asistentesForaneos") \vert{}\vert{} $("asistentesForaneos");
+        const bloqueCompleto = $("bloqueHospedajeCompleto");
+        const bloqueAlternativo = $("bloqueFormularioAlternativo");
+        const bloqueComun = $("bloqueComun");
+
+        function evaluarAsistentesForaneos() {
+            const valor = parseInt(asistentesForaneosInput.value) || 0;
+            if (asistentesForaneosInput.value === "") {
+                bloqueCompleto.style.display = "none";
+                bloqueAlternativo.style.display = "none";
+                bloqueComun.style.display = "none";
+                return;
+            }
+
+            bloqueComun.style.display = "block";
+            if (valor >= 3500) {
+                bloqueCompleto.style.display = "block";
+                bloqueAlternativo.style.display = "none";
+                // Activar requeridos de hospedaje
+                SECCIONES.forEach(({ prefijo: p }) => {
+                    $(p + "Tipo").required = true;
+                });
+                // Desactivar alternativo
+                ["numeroSalas", "metrosCuadrados", "numeroPersonas"].forEach(id => $(id).required = false);
+            } else {
+                bloqueCompleto.style.display = "none";
+                bloqueAlternativo.style.display = "block";
+                // Desactivar requeridos de hospedaje
+                SECCIONES.forEach(({ prefijo: p }) => {
+                    $(p + "Tipo").required = false;
+                });
+            }
+        }
+
+        asistentesForaneosInput.addEventListener("input", evaluarAsistentesForaneos);
+
         const hoy = new Date().toLocaleDateString("en-CA");
         const aFecha = iso => new Date(iso + "T12:00:00");
 
@@ -367,7 +433,8 @@
             const aviso = $(p + "Noches");
 
             const actualizar = () => {
-                [$(p + "Habitaciones"), ini, fin].forEach(el => { el.required = tipo.value !== ""; });
+                const activo = tipo.value !== "" && bloqueCompleto.style.display !== "none";
+                [$(p + "Habitaciones"), ini, fin].forEach(el => { el.required = activo; });
                 ini.min = hoy;
                 fin.min = sumarDias(ini.value || hoy, 1);
                 const n = ini.value && fin.value && fin.value > ini.value ? noches(ini.value, fin.value) : 0;
@@ -382,6 +449,9 @@
         form.addEventListener("reset", () => setTimeout(() => {
             refrescos.forEach(f => f());
             $("grupoOtroBeneficio").style.display = "none";
+            bloqueCompleto.style.display = "none";
+            bloqueAlternativo.style.display = "none";
+            bloqueComun.style.display = "none";
             SECCIONES.forEach(({ prefijo: p }) => {
                 $(p + "GrupoOtraZona").style.display = "none";
             });
@@ -413,7 +483,6 @@
                 datos[p + "Noches"] = spinner && fin ? noches(spinner, fin) : "";
                 datos[p + "Fechas"] = spinner && fin ? `${spinner} a ${fin}` : "";
                 
-                // Procesar zona si seleccionó "Otro"
                 if (datos[p + "Zona"] === "Otro" && datos[p + "OtraZona"]) {
                     datos[p + "Zona"] = "Otro: " + datos[p + "OtraZona"];
                 }
@@ -430,6 +499,9 @@
                 });
                 form.reset();
                 $("grupoOtroBeneficio").style.display = "none";
+                bloqueCompleto.style.display = "none";
+                bloqueAlternativo.style.display = "none";
+                bloqueComun.style.display = "none";
                 SECCIONES.forEach(({ prefijo: p }) => {
                     $(p + "GrupoOtraZona").style.display = "none";
                 });
