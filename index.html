@@ -8,8 +8,6 @@
         :root {
             --primary: #FB8C00;       /* Naranja OCV corporativo */
             --primary-dark: #E65100;  /* Naranja oscuro para hover */
-            --accent-green: #7CB342;  
-            --accent-blue: #0288D1;   
             --text: #2C3E50;
             --muted: #7F8C8D;
             --bg: #F4F6F9;
@@ -42,7 +40,7 @@
             justify-content: center;
             align-items: center;
             z-index: 9999;
-            transition: opacity 0.6s ease, visibility 0.6s ease;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
         }
         #splash-screen.hidden {
             opacity: 0;
@@ -117,7 +115,7 @@
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
         }
-        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; color: #34495E; transition: color 0.2s; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; color: #34495E; }
         
         /* --- ESTILOS Y EFECTO FOCUS & GLOW --- */
         input, select, textarea {
@@ -207,3 +205,320 @@
                 <div class="row">
                     <div class="form-group">
                         <label for="asistentesLocales">Asistentes esperados (locales)</label>
+                        <input type="number" id="asistentesLocales" name="asistentesLocales" min="0" inputmode="numeric" required placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="asistentesForaneos">Asistentes esperados (foráneos)</label>
+                        <input type="number" id="asistentesForaneos" name="asistentesForaneos" min="0" inputmode="numeric" required placeholder="0">
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- SECCIÓN 1: FORMULARIO PRINCIPAL (Para 3500 o más foráneos) -->
+            <div id="bloqueHospedajeCompleto" class="seccion-dinamica">
+                <div id="secciones"></div>
+            </div>
+
+            <!-- SECCIÓN 2: FORMULARIO ALTERNATIVO (Para menos de 3500 foráneos) -->
+            <div id="bloqueFormularioAlternativo" class="seccion-dinamica">
+                <fieldset>
+                    <legend>Detalles del Recinto</legend>
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="numeroSalas">Número de salas</label>
+                            <input type="number" id="numeroSalas" name="numeroSalas" min="0" inputmode="numeric" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="metrosCuadrados">Metros cuadrados</label>
+                            <input type="number" id="metrosCuadrados" name="metrosCuadrados" min="0" inputmode="numeric" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="numeroPersonas">Número de personas</label>
+                            <input type="number" id="numeroPersonas" name="numeroPersonas" min="0" inputmode="numeric" placeholder="0">
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+
+            <!-- BENEFICIOS Y NECESIDADES -->
+            <div id="bloqueComun" class="seccion-dinamica">
+                <fieldset>
+                    <legend>Beneficios Eventos a Hoteles</legend>
+                    <div class="form-group">
+                        <label for="beneficioHotel">Seleccione el beneficio:</label>
+                        <select id="beneficioHotel" name="beneficioHotel">
+                            <option value="">Seleccione una opción...</option>
+                            <option value="Información de hoteles sedes en convocatoria">Información de los hoteles sedes en la convocatoria del evento en la sección de hospedaje.</option>
+                            <option value="Promoción de hotel sede en redes y emailing">Promoción del hotel sede en publicaciones específicas de hospedaje en emailing y redes sociales del evento.</option>
+                            <option value="Creación de contenido para redes sociales">Creación de contenido del hotel sede para redes sociales.</option>
+                            <option value="Sección especial en guía del atleta">Sección especial en la guía del atleta.</option>
+                            <option value="Logo en vallas en registro y evento">Logo en vallas en registro y evento.</option>
+                            <option value="Otros">Otros (especificar)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="grupoOtroBeneficio" style="display: none;">
+                        <label for="otroBeneficio">Especifique el beneficio (Otros):</label>
+                        <input type="text" id="otroBeneficio" name="otroBeneficio" placeholder="Escriba los detalles...">
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Necesidades Especiales (opcional)</legend>
+                    <div class="form-group">
+                        <label for="necesidadesEspeciales">Indique si requiere algún servicio especial</label>
+                        <textarea id="necesidadesEspeciales" name="necesidadesEspeciales" rows="3" placeholder="Detalles adicionales..."></textarea>
+                    </div>
+                </fieldset>
+
+                <input class="hp" type="text" name="sitioWeb" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+                <button type="submit" class="btn-submit" id="btnEnviar">Enviar solicitud</button>
+            </div>
+
+            <div id="estado" class="status" role="status" aria-live="polite"></div>
+        </form>
+    </div>
+
+    <script>
+        // Ocultar Splash Screen garantizado de forma segura
+        window.addEventListener("DOMContentLoaded", () => {
+            setTimeout(() => {
+                const splash = document.getElementById("splash-screen");
+                if (splash) splash.classList.add("hidden");
+            }, 300);
+        });
+
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwVXcPJm00gCF4l2emHcIu1tCfDJsEAOHlK5fH9f7me1DzL2y366x4z9GYsLDbsL12OQ/exec";
+
+        const TIPOS = ["5 estrellas", "4 estrellas", "3 estrellas", "Business Class"];
+        const ZONAS = ["Monterrey Centro", "San Pedro", "Santiago", "Otro"];
+
+        const SECCIONES = [
+            {
+                prefijo: "bloqueo",
+                titulo: "Hospedaje por Bloqueo Cerrado",
+                descripcion: "Compártanos la información de las habitaciones que serán reservadas directamente por el organizador.",
+                tarifaEjemplo: "2,500.00"
+            },
+            {
+                prefijo: "promo",
+                titulo: "Hospedaje para Participantes - Con Código Promocional",
+                descripcion: "Estas habitaciones serían ofrecidas al público en general de su evento.",
+                tarifaEjemplo: "6,000.00"
+            }
+        ];
+
+        const $ = id => document.getElementById(id);
+        const form = $("hospedajeForm");
+        const btn = $("btnEnviar");
+        const estado = $("estado");
+
+        const campo = (id, etiqueta, control) =>
+            `<div class="form-group"><label for="${id}">${etiqueta}</label>${control}</div>`;
+
+        function renderSeccion({ prefijo: p, titulo, descripcion, tarifaEjemplo }) {
+            const opcionesTipos = TIPOS.map(t => `<option value="${t}">${t}</option>`).join("");
+            const opcionesZonas = ZONAS.map(z => `<option value="${z}">${z}</option>`).join("");
+            return `
+            <fieldset>
+                <legend>${titulo}</legend>
+                <p class="hint">${descripcion}</p>
+                <div class="row">
+                    ${campo(p + "Tipo", "Tipo de hospedaje",
+                        `<select id="${p}Tipo" name="${p}Tipo"><option value="">Seleccione...</option>${opcionesTipos}</select>`)}
+                    ${campo(p + "Tarifa", "Tarifa ideal ($)",
+                        `<input type="text" id="${p}Tarifa" name="${p}Tarifa" inputmode="decimal" placeholder="Ej. ${tarifaEjemplo}">`)}
+                </div>
+                <div class="row">
+                    ${campo(p + "Habitaciones", "Cantidad de habitaciones",
+                        `<input type="number" id="${p}Habitaciones" name="${p}Habitaciones" min="0" inputmode="numeric">`)}
+                    ${campo(p + "Zona", "Zona",
+                        `<select id="${p}Zona" name="${p}Zona"><option value="">Seleccione...</option>${opcionesZonas}</select>`)}
+                </div>
+                <div class="form-group" id="${p}GrupoOtraZona" style="display: none;">
+                    ${campo(p + "OtraZona", "Especifique otra zona",
+                        `<input type="text" id="${p}OtraZona" name="${p}OtraZona" placeholder="Escriba la zona...">`)}
+                </div>
+                <div class="row">
+                    ${campo(p + "FechaInicio", "Inicio de hospedaje",
+                        `<input type="date" id="${p}FechaInicio" name="${p}FechaInicio">`)}
+                    ${campo(p + "FechaFin", "Fin de hospedaje",
+                        `<input type="date" id="${p}FechaFin" name="${p}FechaFin">`)}
+                </div>
+                <p class="hint" id="${p}Noches" aria-live="polite"></p>
+            </fieldset>`;
+        }
+
+        $("secciones").innerHTML = SECCIONES.map(renderSeccion).join("");
+
+        SECCIONES.forEach(({ prefijo: p }) => {
+            const selectZona = $(p + "Zona");
+            const grupoOtra = $(p + "GrupoOtraZona");
+            const inputOtra = $(p + "OtraZona");
+
+            selectZona.addEventListener("change", function() {
+                if (this.value === "Otro") {
+                    grupoOtra.style.display = "block";
+                    inputOtra.required = true;
+                } else {
+                    grupoOtra.style.display = "none";
+                    inputOtra.required = false;
+                    inputOtra.value = "";
+                }
+            });
+        });
+
+        $("beneficioHotel").addEventListener("change", function() {
+            const grupoOtro = $("grupoOtroBeneficio");
+            if (this.value === "Otros") {
+                grupoOtro.style.display = "block";
+                $("otroBeneficio").required = true;
+            } else {
+                grupoOtro.style.display = "none";
+                $("otroBeneficio").required = false;
+                $("otroBeneficio").value = "";
+            }
+        });
+
+        const asistentesForaneosInput = $("asistentesForaneos");
+        const bloqueCompleto = $("bloqueHospedajeCompleto");
+        const bloqueAlternativo = $("bloqueFormularioAlternativo");
+        const bloqueComun = $("bloqueComun");
+
+        function evaluarAsistentesForaneos() {
+            const valor = parseInt(asistentesForaneosInput.value) || 0;
+            if (asistentesForaneosInput.value === "") {
+                bloqueCompleto.style.display = "none";
+                bloqueAlternativo.style.display = "none";
+                bloqueComun.style.display = "none";
+                return;
+            }
+
+            bloqueComun.style.display = "block";
+            if (valor >= 3500) {
+                bloqueCompleto.style.display = "block";
+                bloqueAlternativo.style.display = "none";
+                SECCIONES.forEach(({ prefijo: p }) => {
+                    $(p + "Tipo").required = true;
+                });
+                ["numeroSalas", "metrosCuadrados", "numeroPersonas"].forEach(id => $(id).required = false);
+            } else {
+                bloqueCompleto.style.display = "none";
+                bloqueAlternativo.style.display = "block";
+                SECCIONES.forEach(({ prefijo: p }) => {
+                    $(p + "Tipo").required = false;
+                });
+            }
+        }
+
+        asistentesForaneosInput.addEventListener("input", evaluarAsistentesForaneos);
+
+        const hoy = new Date().toLocaleDateString("en-CA");
+        const aFecha = iso => new Date(iso + "T12:00:00");
+
+        const sumarDias = (iso, n) => {
+            const d = aFecha(iso);
+            d.setDate(d.getDate() + n);
+            return d.toLocaleDateString("en-CA");
+        };
+        const noches = (ini, fin) => Math.round((aFecha(fin) - aFecha(ini)) / 864e5);
+
+        const refrescos = [];
+
+        const evIni = $("fechaEventoInicio");
+        const evFin = $("fechaEventoFin");
+        refrescos.push(() => {
+            evIni.min = hoy;
+            evFin.min = evIni.value || hoy;
+        });
+
+        SECCIONES.forEach(({ prefijo: p }) => {
+            const tipo = $(p + "Tipo");
+            const ini = $(p + "FechaInicio");
+            const fin = $(p + "FechaFin");
+            const aviso = $(p + "Noches");
+
+            const actualizar = () => {
+                const activo = tipo.value !== "" && bloqueCompleto.style.display !== "none";
+                [$(p + "Habitaciones"), ini, fin].forEach(el => { el.required = activo; });
+                ini.min = hoy;
+                fin.min = sumarDias(ini.value || hoy, 1);
+                const n = ini.value && fin.value && fin.value > ini.value ? noches(ini.value, fin.value) : 0;
+                aviso.textContent = n ? `${n} ${n === 1 ? "noche" : "noches"} de hospedaje` : "";
+            };
+            [tipo, ini, fin].forEach(el => el.addEventListener("change", actualizar));
+            refrescos.push(actualizar);
+        });
+
+        [evIni, evFin].forEach(el => el.addEventListener("change", refrescos[0]));
+        refrescos.forEach(f => f());
+        form.addEventListener("reset", () => setTimeout(() => {
+            refrescos.forEach(f => f());
+            $("grupoOtroBeneficio").style.display = "none";
+            bloqueCompleto.style.display = "none";
+            bloqueAlternativo.style.display = "none";
+            bloqueComun.style.display = "none";
+            SECCIONES.forEach(({ prefijo: p }) => {
+                $(p + "GrupoOtraZona").style.display = "none";
+            });
+        }));
+
+        document.querySelectorAll('input[type="date"]').forEach(el =>
+            el.addEventListener("click", () => { try { el.showPicker(); } catch (_) {} }));
+
+        function mostrarEstado(texto, tipo) {
+            estado.textContent = texto;
+            estado.className = "status " + tipo;
+        }
+
+        form.addEventListener("submit", async e => {
+            e.preventDefault();
+
+            const datos = Object.fromEntries(new FormData(form));
+
+            if (datos.sitioWeb) {
+                form.reset();
+                return mostrarEstado("Solicitud enviada.", "ok");
+            }
+            delete datos.sitioWeb;
+
+            datos.fechaEvento = datos.fechaEventoInicio;
+            SECCIONES.forEach(({ prefijo: p }) => {
+                const spinner = datos[p + "FechaInicio"];
+                const fin = datos[p + "FechaFin"];
+                datos[p + "Noches"] = spinner && fin ? noches(spinner, fin) : "";
+                datos[p + "Fechas"] = spinner && fin ? `${spinner} a ${fin}` : "";
+                
+                if (datos[p + "Zona"] === "Otro" && datos[p + "OtraZona"]) {
+                    datos[p + "Zona"] = "Otro: " + datos[p + "OtraZona"];
+                }
+            });
+
+            btn.disabled = true;
+            mostrarEstado("Enviando información...", "");
+
+            try {
+                await fetch(APPS_SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    body: JSON.stringify(datos)
+                });
+                form.reset();
+                $("grupoOtroBeneficio").style.display = "none";
+                bloqueCompleto.style.display = "none";
+                bloqueAlternativo.style.display = "none";
+                bloqueComun.style.display = "none";
+                SECCIONES.forEach(({ prefijo: p }) => {
+                    $(p + "GrupoOtraZona").style.display = "none";
+                });
+                mostrarEstado("¡Solicitud enviada con éxito! Se ha notificado a OCV.", "ok");
+            } catch (err) {
+                console.error("Error al enviar:", err);
+                mostrarEstado("No se pudo enviar el formulario. Revise su conexión e inténtelo de nuevo.", "error");
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
