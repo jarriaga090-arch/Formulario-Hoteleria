@@ -231,7 +231,7 @@
                 </fieldset>
             </div>
 
-            <!-- BENEFICIOS Y NECESIDADES (Comunes o adaptables) -->
+            <!-- BENEFICIOS Y NECESIDADES -->
             <div id="bloqueComun" class="seccion-dinamica">
                 <fieldset>
                     <legend>Beneficios Eventos a Hoteles</legend>
@@ -340,7 +340,6 @@
 
         $("secciones").innerHTML = SECCIONES.map(renderSeccion).join("");
 
-        // Control dinámico de zonas (Otros)
         SECCIONES.forEach(({ prefijo: p }) => {
             const selectZona = $(p + "Zona");
             const grupoOtra = $(p + "GrupoOtraZona");
@@ -370,8 +369,8 @@
             }
         });
 
-        // Lógica condicional según Asistentes Foráneos
-        const asistentesForaneosInput = $("data-asistentesForaneos") \vert{}\vert{} $("asistentesForaneos");
+        // Lógica corregida para asistentes foráneos
+        const asistentesForaneosInput = $("asistentesForaneos");
         const bloqueCompleto = $("bloqueHospedajeCompleto");
         const bloqueAlternativo = $("bloqueFormularioAlternativo");
         const bloqueComun = $("bloqueComun");
@@ -389,16 +388,13 @@
             if (valor >= 3500) {
                 bloqueCompleto.style.display = "block";
                 bloqueAlternativo.style.display = "none";
-                // Activar requeridos de hospedaje
                 SECCIONES.forEach(({ prefijo: p }) => {
                     $(p + "Tipo").required = true;
                 });
-                // Desactivar alternativo
                 ["numeroSalas", "metrosCuadrados", "numeroPersonas"].forEach(id => $(id).required = false);
             } else {
                 bloqueCompleto.style.display = "none";
                 bloqueAlternativo.style.display = "block";
-                // Desactivar requeridos de hospedaje
                 SECCIONES.forEach(({ prefijo: p }) => {
                     $(p + "Tipo").required = false;
                 });
