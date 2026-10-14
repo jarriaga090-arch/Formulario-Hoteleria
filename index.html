@@ -265,17 +265,22 @@
                     <div class="row">
                         <div class="form-group">
                             <label for="numeroSalas">Número de salas</label>
-                            <input type="number" id="numeroSalas" name="numeroSalas" min="0" inputmode="numeric" placeholder="0">
+                            <select id="numeroSalas" name="numeroSalas">
+                                <option value="">Seleccione...</option>
+                                <!-- Generación del 1 al 50 dinámicamente -->
+                            </select>
                         </div>
-                        <div class="form-group">
-                            <label for="metrosCuadrados">Metros cuadrados</label>
-                            <input type="number" id="metrosCuadrados" name="metrosCuadrados" min="0" inputmode="numeric" placeholder="0">
+                        <div class="form-group" id="grupoOtraSala" style="display: none;">
+                            <label for="otraSalaCantidad">Especifique el número de salas</label>
+                            <input type="number" id="otraSalaCantidad" name="otraSalaCantidad" min="51" placeholder="Ej. 55">
                         </div>
                         <div class="form-group">
                             <label for="numeroPersonas">Número de personas</label>
                             <input type="number" id="numeroPersonas" name="numeroPersonas" min="0" inputmode="numeric" placeholder="0">
                         </div>
                     </div>
+                    <!-- Contenedor dinámico para los metros cuadrados de cada sala -->
+                    <div id="contenedorMetrosSalas" style="margin-top: 15px;"></div>
                 </fieldset>
             </div>
 
@@ -351,6 +356,67 @@
         const btn = $("btnEnviar");
         const estado = $("estado");
 
+        // Llenar selector de salas del 1 al 50 + "Más de 50"
+        const selectSalas = $("numeroSalas");
+        for (let i = 1; i <= 50; i++) {
+            const opt = document.createElement("option");
+            opt.value = i;
+            opt.textContent = i;
+            selectSalas.appendChild(opt);
+        }
+        const optMas = document.createElement("option");
+        optMas.value = "Mas";
+        optMas.textContent = "Más de 50 (Escribir)";
+        selectSalas.appendChild(optMas);
+
+        // Generar dinámicamente campos de metros cuadrados según el número de salas
+        const contenedorMetros = $("contenedorMetrosSalas");
+        function generarCamposMetros(cantidad) {
+            contenedorMetros.innerHTML = "";
+            const num = parseInt(cantidad) || 0;
+            if (num <= 0) return;
+
+            let html = '<p style="font-weight: 600; font-size: 14px; margin-bottom: 10px; color: #34495E;">Metros cuadrados por sala:</p><div class="row">';
+            for (let i = 1; i <= num; i++) {
+                html += `
+                    <div class="form-group">
+                        <label for="metrosSala${i}">Sala ${i} (m²)</label>
+                        <input type="number" id="metrosSala${i}" name="metrosSala${i}" min="0" placeholder="m² de Sala ${i}" required>
+                    </div>
+                `;
+            }
+            html += '</div>';
+            contenedorMetros.innerHTML = html;
+        }
+
+        selectSalas.addEventListener("change", function() {
+            const grupoOtraSala = $("grupoOtraSala");
+            const inputOtraSala = $("otraSalaCantidad");
+            contenedorMetros.innerHTML = "";
+
+            if (this.value === "Mas") {
+                grupoOtraSala.style.display = "block";
+                inputOtraSala.required = true;
+                inputOtraSala.value = "";
+            } else {
+                grupoOtraSala.style.display = "none";
+                inputOtraSala.required = false;
+                inputOtraSala.value = "";
+                if (this.value) {
+                    generarCamposMetros(this.value);
+                }
+            }
+            actualizarProgreso();
+        });
+
+        $("otraSalaCantidad").addEventListener("input", function() {
+            if (this.value) {
+                generarCamposMetros(this.value);
+            } else {
+                contenedorMetros.innerHTML = "";
+            }
+        });
+
         const campo = (id, etiqueta, control) =>
             `<div class="form-group"><label for="${id}">${etiqueta}</label>${control}</div>`;
 
@@ -392,8 +458,9 @@
         // Barra de progreso interactiva
         const inputsRequeridos = form.querySelectorAll("input[required], select[required]");
         function actualizarProgreso() {
+            const actualesReq = form.querySelectorAll("input[required], select[required]");
             let completados = 0;
-            inputsRequeridos.forEach(inp => {
+            actualesReq.forEach(inp => {
                 if (inp.value.trim() !== "") {
                     completados++;
                     inp.classList.add("valid-field");
@@ -401,7 +468,7 @@
                     inp.classList.remove("valid-field");
                 }
             });
-            const porcentaje = (completados / inputsRequeridos.length) * 100;
+            const porcentaje = (completados / actualesReq.length) * 100;
             $("progress-bar").style.width = Math.min(porcentaje, 100) + "%";
         }
         form.addEventListener("input", actualizarProgreso);
@@ -457,13 +524,17 @@
                 SECCIONES.forEach(({ prefijo: p }) => {
                     $(p + "Tipo").required = true;
                 });
-                ["numeroSalas", "metrosCuadrados", "numeroPersonas"].forEach(id => $(id).required = false);
+                selectSalas.required = false;
+                $("numeroPersonas").required = false;
+                contenedorMetros.innerHTML = "";
             } else {
                 bloqueCompleto.classList.remove("visible");
                 bloqueAlternativo.classList.add("visible");
                 SECCIONES.forEach(({ prefijo: p }) => {
                     $(p + "Tipo").required = false;
                 });
+                selectSalas.required = true;
+                $("numeroPersonas").required = true;
             }
             actualizarProgreso();
         }
@@ -513,6 +584,8 @@
         form.addEventListener("reset", () => setTimeout(() => {
             refrescos.forEach(f => f());
             $("grupoOtroBeneficio").style.display = "none";
+            $("grupoOtraSala").style.display = "none";
+            contenedorMetros.innerHTML = "";
             bloqueCompleto.classList.remove("visible");
             bloqueAlternativo.classList.remove("visible");
             bloqueComun.classList.remove("visible");
@@ -541,6 +614,11 @@
             }
             delete datos.sitioWeb;
 
+            if (datos.numeroSalas === "Mas") {
+                datos.numeroSalas = datos.otraSalaCantidad || "Más de 50";
+            }
+            delete datos.otraSalaCantidad;
+
             datos.fechaEvento = datos.fechaEventoInicio;
             SECCIONES.forEach(({ prefijo: p }) => {
                 const spinner = datos[p + "FechaInicio"];
@@ -564,6 +642,8 @@
                 });
                 form.reset();
                 $("grupoOtroBeneficio").style.display = "none";
+                $("grupoOtraSala").style.display = "none";
+                contenedorMetros.innerHTML = "";
                 bloqueCompleto.classList.remove("visible");
                 bloqueAlternativo.classList.remove("visible");
                 bloqueComun.classList.remove("visible");
