@@ -161,6 +161,29 @@
             border-color: var(--ok);
         }
 
+        /* Estilo para los checkboxes de opción múltiple */
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+        .checkbox-group label {
+            font-weight: normal;
+            font-size: 14px;
+            color: var(--text);
+            cursor: pointer;
+            margin-bottom: 0;
+        }
+
         /* --- ANIMACIÓN DE APARICIÓN SUAVE (FADE & SLIDE UP) --- */
         .seccion-dinamica {
             display: none;
@@ -267,7 +290,7 @@
                             <label for="numeroSalas">Número de salas</label>
                             <select id="numeroSalas" name="numeroSalas">
                                 <option value="">Seleccione...</option>
-                                <!-- Generación del 1 al 50 dinámicamente -->
+                                <!-- Se llena dinámicamente del 1 al 50 -->
                             </select>
                         </div>
                         <div class="form-group" id="grupoOtraSala" style="display: none;">
@@ -279,7 +302,7 @@
                             <input type="number" id="numeroPersonas" name="numeroPersonas" min="0" inputmode="numeric" placeholder="0">
                         </div>
                     </div>
-                    <!-- Contenedor dinámico para los metros cuadrados de cada sala -->
+                    <!-- Contenedor dinámico para metros cuadrados por sala -->
                     <div id="contenedorMetrosSalas" style="margin-top: 15px;"></div>
                 </fieldset>
             </div>
@@ -288,19 +311,34 @@
             <div id="bloqueComun" class="seccion-dinamica">
                 <fieldset>
                     <legend>Beneficios Eventos a Hoteles</legend>
-                    <div class="form-group">
-                        <label for="beneficioHotel">Seleccione el beneficio:</label>
-                        <select id="beneficioHotel" name="beneficioHotel">
-                            <option value="">Seleccione una opción...</option>
-                            <option value="Información de hoteles sedes en convocatoria">Información de los hoteles sedes en la convocatoria del evento en la sección de hospedaje.</option>
-                            <option value="Promoción de hotel sede en redes y emailing">Promoción del hotel sede en publicaciones específicas de hospedaje en emailing y redes sociales del evento.</option>
-                            <option value="Creación de contenido para redes sociales">Creación de contenido del hotel sede para redes sociales.</option>
-                            <option value="Sección especial en guía del atleta">Sección especial en la guía del atleta.</option>
-                            <option value="Logo en vallas en registro y evento">Logo en vallas en registro y evento.</option>
-                            <option value="Otros">Otros (especificar)</option>
-                        </select>
+                    <label style="margin-bottom: 12px; display: block;">Seleccione uno o más beneficios:</label>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="ben1" name="beneficiosHotel" value="Información de hoteles sedes en convocatoria">
+                        <label for="ben1">Información de los hoteles sedes en la convocatoria del evento en la sección de hospedaje.</label>
                     </div>
-                    <div class="form-group" id="grupoOtroBeneficio" style="display: none;">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="ben2" name="beneficiosHotel" value="Promoción de hotel sede en redes y emailing">
+                        <label for="ben2">Promoción del hotel sede en publicaciones específicas de hospedaje en emailing y redes sociales del evento.</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="ben3" name="beneficiosHotel" value="Creación de contenido para redes sociales">
+                        <label for="ben3">Creación de contenido del hotel sede para redes sociales.</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="ben4" name="beneficiosHotel" value="Sección especial en guía del atleta">
+                        <label for="ben4">Sección especial en la guía del atleta.</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="ben5" name="beneficiosHotel" value="Logo en vallas en registro y evento">
+                        <label for="ben5">Logo en vallas en registro y evento.</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="benOtros" name="beneficiosHotel" value="Otros">
+                        <label for="benOtros">Otros (especificar)</label>
+                    </div>
+
+                    <div class="form-group" id="grupoOtroBeneficio" style="display: none; margin-top: 15px;">
                         <label for="otroBeneficio">Especifique el beneficio (Otros):</label>
                         <input type="text" id="otroBeneficio" name="otroBeneficio" placeholder="Escriba los detalles...">
                     </div>
@@ -456,7 +494,6 @@
         $("secciones").innerHTML = SECCIONES.map(renderSeccion).join("");
 
         // Barra de progreso interactiva
-        const inputsRequeridos = form.querySelectorAll("input[required], select[required]");
         function actualizarProgreso() {
             const actualesReq = form.querySelectorAll("input[required], select[required]");
             let completados = 0;
@@ -468,7 +505,7 @@
                     inp.classList.remove("valid-field");
                 }
             });
-            const porcentaje = (completados / actualesReq.length) * 100;
+            const porcentaje = actualesReq.length > 0 ? (completados / actualesReq.length) * 100 : 0;
             $("progress-bar").style.width = Math.min(porcentaje, 100) + "%";
         }
         form.addEventListener("input", actualizarProgreso);
@@ -491,15 +528,17 @@
             });
         });
 
-        $("beneficioHotel").addEventListener("change", function() {
+        // Mostrar u ocultar campo de "Otros" en beneficios al marcar el checkbox
+        $("benOtros").addEventListener("change", function() {
             const grupoOtro = $("grupoOtroBeneficio");
-            if (this.value === "Otros") {
+            const inputOtro = $("otroBeneficio");
+            if (this.checked) {
                 grupoOtro.style.display = "block";
-                $("otroBeneficio").required = true;
+                inputOtro.required = true;
             } else {
                 grupoOtro.style.display = "none";
-                $("otroBeneficio").required = false;
-                $("otroBeneficio").value = "";
+                inputOtro.required = false;
+                inputOtro.value = "";
             }
         });
 
@@ -606,13 +645,23 @@
         form.addEventListener("submit", async e => {
             e.preventDefault();
 
-            const datos = Object.fromEntries(new FormData(form));
+            const formData = new FormData(form);
+            const datos = Object.fromEntries(formData);
 
             if (datos.sitioWeb) {
                 form.reset();
                 return mostrarEstado("Solicitud enviada.", "ok");
             }
             delete datos.sitioWeb;
+
+            // Agrupar los beneficios seleccionados por opción múltiple
+            const beneficiosSeleccionados = formData.getAll("beneficiosHotel");
+            if (beneficiosSeleccionados.includes("Otros") && datos.otroBeneficio) {
+                const index = beneficiosSeleccionados.indexOf("Otros");
+                beneficiosSeleccionados[index] = "Otros: " + datos.otroBeneficio;
+            }
+            delete datos.otroBeneficio;
+            datos.beneficiosHotel = beneficiosSeleccionados.join(", ");
 
             if (datos.numeroSalas === "Mas") {
                 datos.numeroSalas = datos.otraSalaCantidad || "Más de 50";
