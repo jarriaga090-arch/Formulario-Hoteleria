@@ -287,17 +287,6 @@
                     <legend>Detalles del Recinto</legend>
                     <div class="row">
                         <div class="form-group">
-                            <label for="numeroSalas">Número de salas</label>
-                            <select id="numeroSalas" name="numeroSalas">
-                                <option value="">Seleccione...</option>
-                                <!-- Se llena dinámicamente del 1 al 50 -->
-                            </select>
-                        </div>
-                        <div class="form-group" id="grupoOtraSala" style="display: none;">
-                            <label for="otraSalaCantidad">Especifique el número de salas</label>
-                            <input type="number" id="otraSalaCantidad" name="otraSalaCantidad" min="51" placeholder="Ej. 55">
-                        </div>
-                        <div class="form-group">
                             <label for="tipoRecinto">Tipo de recinto</label>
                             <select id="tipoRecinto" name="tipoRecinto">
                                 <option value="">Seleccione...</option>
@@ -310,6 +299,17 @@
                                 <option value="Cóctel">Cóctel</option>
                                 <option value="Estructura">Estructura</option>
                             </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="numeroSalas">Número de salas</label>
+                            <select id="numeroSalas" name="numeroSalas">
+                                <option value="">Seleccione...</option>
+                                <!-- Se llena dinámicamente del 1 al 50 -->
+                            </select>
+                        </div>
+                        <div class="form-group" id="grupoOtraSala" style="display: none;">
+                            <label for="otraSalaCantidad">Especifique el número de salas</label>
+                            <input type="number" id="otraSalaCantidad" name="otraSalaCantidad" min="51" placeholder="Ej. 55">
                         </div>
                         <div class="form-group">
                             <label for="numeroPersonas">Número de personas</label>
@@ -577,8 +577,8 @@
                 SECCIONES.forEach(({ prefijo: p }) => {
                     $(p + "Tipo").required = true;
                 });
-                selectSalas.required = false;
                 $("tipoRecinto").required = false;
+                selectSalas.required = false;
                 $("numeroPersonas").required = false;
                 contenedorMetros.innerHTML = "";
             } else {
@@ -587,8 +587,8 @@
                 SECCIONES.forEach(({ prefijo: p }) => {
                     $(p + "Tipo").required = false;
                 });
-                selectSalas.required = true;
                 $("tipoRecinto").required = true;
+                selectSalas.required = true;
                 $("numeroPersonas").required = true;
             }
             actualizarProgreso();
@@ -638,7 +638,7 @@
         
         form.addEventListener("reset", () => setTimeout(() => {
             refrescos.forEach(f => f());
-            $("grupoOtroBeneficio").style.display = "none";
+            $("grupoOtraBeneficio").style.display = "none";
             $("grupoOtraSala").style.display = "none";
             contenedorMetros.innerHTML = "";
             bloqueCompleto.classList.remove("visible");
