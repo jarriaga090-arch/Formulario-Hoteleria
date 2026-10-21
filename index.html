@@ -134,6 +134,23 @@
         }
         label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; color: #34495E; }
         
+        /* Sub-tarjetas para cada sala en detalles del recinto */
+        .sala-card {
+            background: #FFFFFF;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+        .sala-card h4 {
+            margin: 0 0 15px 0;
+            color: var(--primary);
+            font-size: 16px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
         /* --- ESTILOS Y EFECTO FOCUS & GLOW --- */
         input, select, textarea {
             width: 100%;
@@ -287,21 +304,7 @@
                     <legend>Detalles del Recinto</legend>
                     <div class="row">
                         <div class="form-group">
-                            <label for="tipoRecinto">Tipo de recinto</label>
-                            <select id="tipoRecinto" name="tipoRecinto">
-                                <option value="">Seleccione...</option>
-                                <option value="Escuela">Escuela</option>
-                                <option value="Herradura">Herradura</option>
-                                <option value="Expo">Expo</option>
-                                <option value="Auditorio">Auditorio</option>
-                                <option value="Imperial">Imperial</option>
-                                <option value="Banquete">Banquete</option>
-                                <option value="Cóctel">Cóctel</option>
-                                <option value="Estructura">Estructura</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="numeroSalas">Número de salas</label>
+                            <label for="numeroSalas">Número de salas / espacios</label>
                             <select id="numeroSalas" name="numeroSalas">
                                 <option value="">Seleccione...</option>
                             </select>
@@ -310,13 +313,9 @@
                             <label for="otraSalaCantidad">Especifique el número de salas</label>
                             <input type="number" id="otraSalaCantidad" name="otraSalaCantidad" min="51" placeholder="Ej. 55">
                         </div>
-                        <div class="form-group">
-                            <label for="numeroPersonas">Número de personas</label>
-                            <input type="number" id="numeroPersonas" name="numeroPersonas" min="0" inputmode="numeric" placeholder="0">
-                        </div>
                     </div>
-                    <!-- Contenedor dinámico para metros cuadrados por sala -->
-                    <div id="contenedorMetrosSalas" style="margin-top: 15px;"></div>
+                    <!-- Contenedor dinámico para las tarjetas detalladas de cada sala -->
+                    <div id="contenedorSalasDetalle" style="margin-top: 15px;"></div>
                 </fieldset>
             </div>
 
@@ -385,6 +384,7 @@
         const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwVXcPJm00gCF4l2emHcIu1tCfDJsEAOHlK5fH9f7me1DzL2y366x4z9GYsLDbsL12OQ/exec";
 
         const TIPOS = ["Gran Turismo", "5 estrellas", "4 estrellas", "3 estrellas", "Business Class"];
+        const FORMATOS_RECINTO = ["Escuela", "Herradura", "Expo", "Auditorio", "Imperial", "Banquete", "Cóctel", "Estructura"];
         const ZONAS = ["Monterrey Centro", "San Pedro", "Santiago", "Otro"];
 
         const SECCIONES = [
@@ -428,32 +428,49 @@
             selectSalas.appendChild(optMas);
         }
 
-        // Generar dinámicamente campos de metros cuadrados según el número de salas
-        const contenedorMetros = $("contenedorMetrosSalas");
-        function generarCamposMetros(cantidad) {
-            if (!contenedorMetros) return;
-            contenedorMetros.innerHTML = "";
+        // Generar dinámicamente campos detallados para cada sala
+        const contenedorSalasDetalle = $("contenedorSalasDetalle");
+        function generarCamposSalasDetalle(cantidad) {
+            if (!contenedorSalasDetalle) return;
+            contenedorSalasDetalle.innerHTML = "";
             const num = parseInt(cantidad) || 0;
             if (num <= 0) return;
 
-            let html = '<p style="font-weight: 600; font-size: 14px; margin-bottom: 10px; color: #34495E;">Metros cuadrados por sala:</p><div class="row">';
+            const opcionesFormatos = FORMATOS_RECINTO.map(f => `<option value="${f}">${f}</option>`).join("");
+
+            let html = "";
             for (let i = 1; i <= num; i++) {
                 html += `
-                    <div class="form-group">
-                        <label for="metrosSala${i}">Sala ${i} (m²)</label>
-                        <input type="number" id="metrosSala${i}" name="metrosSala${i}" min="0" placeholder="m² de Sala ${i}" required>
+                    <div class="sala-card">
+                        <h4>Sala / Espacio ${i}</h4>
+                        <div class="row">
+                            <div class="form-group">
+                                <label for="salaMetros${i}">Metros cuadrados (m²)</label>
+                                <input type="number" id="salaMetros${i}" name="salaMetros${i}" min="0" placeholder="Ej. 120" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="salaFormato${i}">Tipo de formato</label>
+                                <select id="salaFormato${i}" name="salaFormato${i}" required>
+                                    <option value="">Seleccione...</option>
+                                    ${opcionesFormatos}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="salaAforo${i}">Aforo / Número de personas</label>
+                                <input type="number" id="salaAforo${i}" name="salaAforo${i}" min="0" inputmode="numeric" placeholder="Ej. 100" required>
+                            </div>
+                        </div>
                     </div>
                 `;
             }
-            html += '</div>';
-            contenedorMetros.innerHTML = html;
+            contenedorSalasDetalle.innerHTML = html;
         }
 
         if (selectSalas) {
             selectSalas.addEventListener("change", function() {
                 const grupoOtraSala = $("grupoOtraSala");
                 const inputOtraSala = $("otraSalaCantidad");
-                if (contenedorMetros) contenedorMetros.innerHTML = "";
+                if (contenedorSalasDetalle) contenedorSalasDetalle.innerHTML = "";
 
                 if (this.value === "Mas") {
                     if (grupoOtraSala) grupoOtraSala.style.display = "block";
@@ -464,7 +481,7 @@
                     if (inputOtraSala) inputOtraSala.required = false;
                     if (inputOtraSala) inputOtraSala.value = "";
                     if (this.value) {
-                        generarCamposMetros(this.value);
+                        generarCamposSalasDetalle(this.value);
                     }
                 }
                 actualizarProgreso();
@@ -475,9 +492,9 @@
         if (otraSalaInput) {
             otraSalaInput.addEventListener("input", function() {
                 if (this.value) {
-                    generarCamposMetros(this.value);
-                } else if (contenedorMetros) {
-                    contenedorMetros.innerHTML = "";
+                    generarCamposSalasDetalle(this.value);
+                } else if (contenedorSalasDetalle) {
+                    contenedorSalasDetalle.innerHTML = "";
                 }
             });
         }
@@ -606,11 +623,7 @@
                     if (tipoEl) tipoEl.required = true;
                 });
                 if (selectSalas) selectSalas.required = false;
-                const tipoRecintoEl = $("tipoRecinto");
-                if (tipoRecintoEl) tipoRecintoEl.required = false;
-                const numPersonasEl = $("numeroPersonas");
-                if (numPersonasEl) numPersonasEl.required = false;
-                if (contenedorMetros) contenedorMetros.innerHTML = "";
+                if (contenedorSalasDetalle) contenedorSalasDetalle.innerHTML = "";
             } else {
                 if (bloqueCompleto) bloqueCompleto.classList.remove("visible");
                 if (bloqueAlternativo) bloqueAlternativo.classList.add("visible");
@@ -619,10 +632,6 @@
                     if (tipoEl) tipoEl.required = false;
                 });
                 if (selectSalas) selectSalas.required = true;
-                const tipoRecintoEl = $("tipoRecinto");
-                if (tipoRecintoEl) tipoRecintoEl.required = true;
-                const numPersonasEl = $("numeroPersonas");
-                if (numPersonasEl) numPersonasEl.required = true;
             }
             actualizarProgreso();
         }
@@ -685,7 +694,7 @@
                 if (grupoOtroBen) grupoOtroBen.style.display = "none";
                 const grupoOtraSal = $("grupoOtraSala");
                 if (grupoOtraSal) grupoOtraSal.style.display = "none";
-                if (contenedorMetros) contenedorMetros.innerHTML = "";
+                if (contenedorSalasDetalle) contenedorSalasDetalle.innerHTML = "";
                 if (bloqueCompleto) bloqueCompleto.classList.remove("visible");
                 if (bloqueAlternativo) bloqueAlternativo.classList.remove("visible");
                 if (bloqueComun) bloqueComun.classList.remove("visible");
@@ -719,7 +728,7 @@
                 }
                 delete datos.sitioWeb;
 
-                // Recolectar todos los beneficios múltiples seleccionados
+                // Beneficios múltiples
                 const beneficiosSeleccionados = formData.getAll("beneficiosHotel");
                 if (beneficiosSeleccionados.includes("Otros") && datos.otroBeneficio) {
                     const index = beneficiosSeleccionados.indexOf("Otros");
@@ -734,16 +743,18 @@
                 }
                 delete datos.otraSalaCantidad;
 
-                // Consolidar los metros cuadrados dinámicos de cada sala
+                // Consolidar detalles dinámicos de cada sala
                 let totalSalasNum = parseInt(datos.numeroSalas) || 0;
-                let m2List = [];
+                let detalleSalasLista = [];
                 for (let i = 1; i <= totalSalasNum; i++) {
-                    if (datos[`metrosSala${i}`]) {
-                        m2List.push(`Sala ${i}: ${datos[`metrosSala${i}`]} m²`);
-                        delete datos[`metrosSala${i}`];
+                    if (datos[`salaMetros${i}`] || datos[`salaFormato${i}`] || datos[`salaAforo${i}`]) {
+                        detalleSalasLista.push(`Sala ${i} -> Metros: ${datos[`salaMetros${i}`] || 0} m² | Formato: ${datos[`salaFormato${i}`] || 'N/A'} | Aforo: ${datos[`salaAforo${i}`] || 0} personas`);
+                        delete datos[`salaMetros${i}`];
+                        delete datos[`salaFormato${i}`];
+                        delete datos[`salaAforo${i}`];
                     }
                 }
-                datos.metrosCuadrados = m2List.length > 0 ? m2List.join(" | ") : (datos.metrosCuadrados || "0");
+                datos.detalleRecintoSalas = detalleSalasLista.length > 0 ? detalleSalasLista.join("\n") : "No especificado";
 
                 datos.fechaEvento = datos.fechaEventoInicio;
                 SECCIONES.forEach(({ prefijo: p }) => {
@@ -771,7 +782,7 @@
                     if (gOb) gOb.style.display = "none";
                     const gOs = $("grupoOtraSala");
                     if (gOs) gOs.style.display = "none";
-                    if (contenedorMetros) contenedorMetros.innerHTML = "";
+                    if (contenedorSalasDetalle) contenedorSalasDetalle.innerHTML = "";
                     if (bloqueCompleto) bloqueCompleto.classList.remove("visible");
                     if (bloqueAlternativo) bloqueAlternativo.classList.remove("visible");
                     if (bloqueComun) bloqueComun.classList.remove("visible");
