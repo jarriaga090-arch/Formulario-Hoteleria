@@ -300,6 +300,7 @@
             <div id="bloqueFormularioAlternativo" class="seccion-dinamica">
                 <fieldset>
                     <legend>Detalles del Recinto</legend>
+                    <p class="hint">Si requiere salas o espacios, seleccione la opción correspondiente. De lo contrario, seleccione “No aplica”.</p>
                     <div class="row">
                         <div class="form-group">
                             <label for="numeroSalasSelect">Número de salas / espacios</label>
@@ -311,6 +312,7 @@
                                 <option value="4">4</option>
                                 <option value="5">5</option>
                                 <option value="mas">Más de 5</option>
+                                <option value="no_aplica">No aplica</option>
                             </select>
                         </div>
                         <div class="form-group" id="grupoSalasManual" style="display: none;">
@@ -328,7 +330,7 @@
             <div id="bloqueComun" class="seccion-dinamica">
                 <fieldset>
                     <legend>Beneficios Eventos a Hoteles</legend>
-                    <p class="hint">Seleccione los beneficios promocionales que su evento puede ofrecer para aumentar su visibilidad, fortalecer su marca y promover sus servicios entre los participantes y asistentes del evento.</p>
+                    <p class="hint">Seleccione los beneficios promocionales que su hotel puede ofrecer para aumentar su visibilidad, fortalecer su marca y promover sus servicios entre los participantes y asistentes del evento.</p>
                     
                     <div class="checkbox-group">
                         <label class="checkbox-label">
@@ -506,7 +508,7 @@
             }
         });
 
-        // Lógica de Salas Dinámicas (1 al 5 o más)
+        // Lógica de Salas Dinámicas (1 al 5, más de 5 o no aplica)
         const selectSalas = $("numeroSalasSelect");
         const grupoManual = $("grupoSalasManual");
         const inputManual = $("numeroSalasManual");
@@ -552,9 +554,12 @@
                 grupoManual.style.display = "none";
                 inputManual.required = false;
                 inputManual.value = "";
-                const n = parseInt(this.value) || 0;
-                if (n > 0) generarCamposSalas(n);
-                else contenedorSalas.innerHTML = "";
+                if (this.value === "no_aplica" || this.value === "") {
+                    contenedorSalas.innerHTML = "";
+                } else {
+                    const n = parseInt(this.value) || 0;
+                    if (n > 0) generarCamposSalas(n);
+                }
             }
         });
 
@@ -582,16 +587,13 @@
                 return;
             }
 
-            // El hospedaje y beneficios se muestran siempre para cualquier cantidad de asistentes
             bloqueCompleto.classList.add("visible");
             bloqueComun.classList.add("visible");
 
             if (valor < 3500) {
-                // Si son menos de 3,500 foráneos, también mostramos la sección de Detalles del Recinto
                 bloqueAlternativo.classList.add("visible");
                 selectSalas.required = true;
             } else {
-                // Si son 3,500 o más, ocultamos los detalles de recintos menores
                 bloqueAlternativo.classList.remove("visible");
                 selectSalas.required = false;
                 contenedorSalas.innerHTML = "";
@@ -674,7 +676,6 @@
             }
             delete datos.sitioWeb;
 
-            // Recopilar múltiples beneficios seleccionados
             const beneficiosSeleccionados = formData.getAll("beneficiosHotel");
             if (beneficiosSeleccionados.includes("Otros") && datos.otroBeneficio) {
                 const idx = beneficiosSeleccionados.indexOf("Otros");
@@ -694,20 +695,24 @@
                 }
             });
 
-            // Recopilar detalles de salas dinámicas si el evento es menor a 3,500
             const asistentesForaneos = parseInt(datos.asistentesForaneos) || 0;
             if (asistentesForaneos < 3500) {
-                const totalSalas = datos.numeroSalasSelect === "mas" ? (datos.numeroSalasManual || 0) : datos.numeroSalasSelect;
-                datos.numeroSalas = totalSalas;
-                
-                let detalleSalasTexto = "";
-                for (let i = 1; i <= totalSalas; i++) {
-                    const m = datos[`sala_${i}_metros`] || "0";
-                    const f = datos[`sala_${i}_formato`] || "N/A";
-                    const a = datos[`sala_${i}_aforo`] || "0";
-                    detalleSalasTexto += `Sala ${i}: ${m} m² | Formato: ${f} | Aforo: ${a} personas\n`;
+                if (datos.numeroSalasSelect === "no_aplica") {
+                    datos.numeroSalas = "No aplica";
+                    datos.detalleRecintoSalas = "No se requieren salas / espacios.";
+                } else {
+                    const totalSalas = datos.numeroSalasSelect === "mas" ? (datos.numeroSalasManual || 0) : datos.numeroSalasSelect;
+                    datos.numeroSalas = totalSalas;
+                    
+                    let detalleSalasTexto = "";
+                    for (let i = 1; i <= totalSalas; i++) {
+                        const m = datos[`sala_${i}_metros`] || "0";
+                        const f = datos[`sala_${i}_formato`] || "N/A";
+                        const a = datos[`sala_${i}_aforo`] || "0";
+                        detalleSalasTexto += `Sala ${i}: ${m} m² | Formato: ${f} | Aforo: ${a} personas\n`;
+                    }
+                    datos.detalleRecintoSalas = detalleSalasTexto;
                 }
-                datos.detalleRecintoSalas = detalleSalasTexto;
             }
 
             btn.disabled = true;
