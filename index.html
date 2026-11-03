@@ -291,12 +291,12 @@
                 </div>
             </fieldset>
 
-            <!-- SECCIÓN 1: HOSPEDAJE (Para 3,500 o más foráneos) -->
+            <!-- SECCIÓN 1: HOSPEDAJE (Disponible siempre para cualquier evento) -->
             <div id="bloqueHospedajeCompleto" class="seccion-dinamica">
                 <div id="secciones"></div>
             </div>
 
-            <!-- SECCIÓN 2: DETALLES DEL RECINTO (Para menos de 3,500 foráneos) -->
+            <!-- SECCIÓN 2: DETALLES DEL RECINTO (Para eventos menores a 3,500 foráneos) -->
             <div id="bloqueFormularioAlternativo" class="seccion-dinamica">
                 <fieldset>
                     <legend>Detalles del Recinto</legend>
@@ -328,7 +328,7 @@
             <div id="bloqueComun" class="seccion-dinamica">
                 <fieldset>
                     <legend>Beneficios Eventos a Hoteles</legend>
-                    <p class="hint">Seleccione los beneficios promocionales que su evento puede ofrecer para aumentar su visibilidad, fortalecer su marca y promover sus servicios entre los participantes y asistentes del evento.</p>
+                    <p class="hint">Seleccione los beneficios promocionales que su hotel puede ofrecer para aumentar su visibilidad, fortalecer su marca y promover sus servicios entre los participantes y asistentes del evento.</p>
                     
                     <div class="checkbox-group">
                         <label class="checkbox-label">
@@ -398,7 +398,7 @@
             {
                 prefijo: "talento",
                 titulo: "Hospedaje por Bloqueo Cerrado - Talento",
-                descripcion: "Este apartado es para el hospedaje de Directivos, Gerencia, Talentos o ejecutivos.(Sera pagado directamente por el comite organizador del evento.",
+                descripcion: "Este apartado es para el hospedaje de Directivos, Gerencia, Talentos o ejecutivos. (Será pagado directamente por el comité organizador del evento).",
                 tarifaEjemplo: "3,500.00"
             },
             {
@@ -560,7 +560,7 @@
 
         inputManual.addEventListener("input", function() {
             const n = parseInt(this.value) || 0;
-            if (n > 0 && n <= 200) {
+            if (n > 5 && n <= 200) {
                 generarCamposSalas(n);
             } else {
                 contenedorSalas.innerHTML = "";
@@ -582,22 +582,19 @@
                 return;
             }
 
+            // El hospedaje y beneficios se muestran siempre para cualquier cantidad de asistentes
+            bloqueCompleto.classList.add("visible");
             bloqueComun.classList.add("visible");
-            if (valor >= 3500) {
-                bloqueCompleto.classList.add("visible");
+
+            if (valor < 3500) {
+                // Si son menos de 3,500 foráneos, también mostramos la sección de Detalles del Recinto
+                bloqueAlternativo.classList.add("visible");
+                selectSalas.required = true;
+            } else {
+                // Si son 3,500 o más, ocultamos los detalles de recintos menores
                 bloqueAlternativo.classList.remove("visible");
-                SECCIONES.forEach(({ prefijo: p }) => {
-                    $(p + "Tipo").required = true;
-                });
                 selectSalas.required = false;
                 contenedorSalas.innerHTML = "";
-            } else {
-                bloqueCompleto.classList.remove("visible");
-                bloqueAlternativo.classList.add("visible");
-                SECCIONES.forEach(({ prefijo: p }) => {
-                    $(p + "Tipo").required = false;
-                });
-                selectSalas.required = true;
             }
             actualizarProgreso();
         }
@@ -697,7 +694,7 @@
                 }
             });
 
-            // Recopilar detalles de salas dinámicas si aplica
+            // Recopilar detalles de salas dinámicas si el evento es menor a 3,500
             const asistentesForaneos = parseInt(datos.asistentesForaneos) || 0;
             if (asistentesForaneos < 3500) {
                 const totalSalas = datos.numeroSalasSelect === "mas" ? (datos.numeroSalasManual || 0) : datos.numeroSalasSelect;
