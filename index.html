@@ -8,8 +8,6 @@
         :root {
             --primary: #FB8C00;       /* Naranja OCV corporativo */
             --primary-dark: #E65100;  /* Naranja oscuro para hover */
-            --accent-green: #7CB342;  
-            --accent-blue: #0288D1;   
             --text: #2C3E50;
             --muted: #7F8C8D;
             --bg: #F4F6F9;
@@ -291,12 +289,12 @@
                 </div>
             </fieldset>
 
-            <!-- SECCIÓN 1: HOSPEDAJE (Disponible siempre para cualquier evento) -->
+            <!-- SECCIÓN 1: HOSPEDAJE (Disponible siempre) -->
             <div id="bloqueHospedajeCompleto" class="seccion-dinamica">
                 <div id="secciones"></div>
             </div>
 
-            <!-- SECCIÓN 2: DETALLES DEL RECINTO (Para eventos menores a 3,500 foráneos) -->
+            <!-- SECCIÓN 2: DETALLES DEL RECINTO (Disponible siempre) -->
             <div id="bloqueFormularioAlternativo" class="seccion-dinamica">
                 <fieldset>
                     <legend>Detalles del Recinto</legend>
@@ -304,7 +302,7 @@
                     <div class="row">
                         <div class="form-group">
                             <label for="numeroSalasSelect">Número de salas / espacios</label>
-                            <select id="numeroSalasSelect" name="numeroSalasSelect">
+                            <select id="numeroSalasSelect" name="numeroSalasSelect" required>
                                 <option value="">Seleccione...</option>
                                 <option value="1">1</option>
                                 <option value="2">2</option>
@@ -330,7 +328,7 @@
             <div id="bloqueComun" class="seccion-dinamica">
                 <fieldset>
                     <legend>Beneficios Eventos a Hoteles</legend>
-                    <p class="hint">Seleccione los beneficios promocionales que su evento puede ofrecer para aumentar su visibilidad, fortalecer su marca y promover sus servicios entre los participantes y asistentes del evento.</p>
+                    <p class="hint">Seleccione los beneficios promocionales que su hotel puede ofrecer para aumentar su visibilidad, fortalecer su marca y promover sus servicios entre los participantes y asistentes del evento.</p>
                     
                     <div class="checkbox-group">
                         <label class="checkbox-label">
@@ -588,16 +586,10 @@
             }
 
             bloqueCompleto.classList.add("visible");
+            bloqueAlternativo.classList.add("visible");
             bloqueComun.classList.add("visible");
-
-            if (valor < 3500) {
-                bloqueAlternativo.classList.add("visible");
-                selectSalas.required = true;
-            } else {
-                bloqueAlternativo.classList.remove("visible");
-                selectSalas.required = false;
-                contenedorSalas.innerHTML = "";
-            }
+            selectSalas.required = true;
+            
             actualizarProgreso();
         }
 
@@ -695,24 +687,21 @@
                 }
             });
 
-            const asistentesForaneos = parseInt(datos.asistentesForaneos) || 0;
-            if (asistentesForaneos < 3500) {
-                if (datos.numeroSalasSelect === "no_aplica") {
-                    datos.numeroSalas = "No aplica";
-                    datos.detalleRecintoSalas = "No se requieren salas / espacios.";
-                } else {
-                    const totalSalas = datos.numeroSalasSelect === "mas" ? (datos.numeroSalasManual || 0) : datos.numeroSalasSelect;
-                    datos.numeroSalas = totalSalas;
-                    
-                    let detalleSalasTexto = "";
-                    for (let i = 1; i <= totalSalas; i++) {
-                        const m = datos[`sala_${i}_metros`] || "0";
-                        const f = datos[`sala_${i}_formato`] || "N/A";
-                        const a = datos[`sala_${i}_aforo`] || "0";
-                        detalleSalasTexto += `Sala ${i}: ${m} m² | Formato: ${f} | Aforo: ${a} personas\n`;
-                    }
-                    datos.detalleRecintoSalas = detalleSalasTexto;
+            if (datos.numeroSalasSelect === "no_aplica") {
+                datos.numeroSalas = "No aplica";
+                datos.detalleRecintoSalas = "No se requieren salas / espacios.";
+            } else {
+                const totalSalas = datos.numeroSalasSelect === "mas" ? (datos.numeroSalasManual || 0) : datos.numeroSalasSelect;
+                datos.numeroSalas = totalSalas;
+                
+                let detalleSalasTexto = "";
+                for (let i = 1; i <= totalSalas; i++) {
+                    const m = datos[`sala_${i}_metros`] || "0";
+                    const f = datos[`sala_${i}_formato`] || "N/A";
+                    const a = datos[`sala_${i}_aforo`] || "0";
+                    detalleSalasTexto += `Sala ${i}: ${m} m² | Formato: ${f} | Aforo: ${a} personas\n`;
                 }
+                datos.detalleRecintoSalas = detalleSalasTexto;
             }
 
             btn.disabled = true;
