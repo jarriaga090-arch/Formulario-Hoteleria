@@ -289,20 +289,19 @@
                 </div>
             </fieldset>
 
-            <!-- SECCIÓN 1: HOSPEDAJE (Disponible siempre) -->
+            <!-- SECCIÓN 1: HOSPEDAJE (Para 3500 o más foráneos) -->
             <div id="bloqueHospedajeCompleto" class="seccion-dinamica">
                 <div id="secciones"></div>
             </div>
 
-            <!-- SECCIÓN 2: DETALLES DEL RECINTO (Disponible siempre) -->
+            <!-- SECCIÓN 2: DETALLES DEL RECINTO (Para menos de 3500 foráneos) -->
             <div id="bloqueFormularioAlternativo" class="seccion-dinamica">
                 <fieldset>
                     <legend>Detalles del Recinto</legend>
-                    <p class="hint">Si requiere salas o espacios, seleccione la opción correspondiente. De lo contrario, seleccione “No aplica”.</p>
                     <div class="row">
                         <div class="form-group">
                             <label for="numeroSalasSelect">Número de salas / espacios</label>
-                            <select id="numeroSalasSelect" name="numeroSalasSelect" required>
+                            <select id="numeroSalasSelect" name="numeroSalasSelect">
                                 <option value="">Seleccione...</option>
                                 <option value="1">1</option>
                                 <option value="2">2</option>
@@ -506,7 +505,7 @@
             }
         });
 
-        // Lógica de Salas Dinámicas (1 al 5, más de 5 o no aplica)
+        // Lógica de Salas Dinámicas
         const selectSalas = $("numeroSalasSelect");
         const grupoManual = $("grupoSalasManual");
         const inputManual = $("numeroSalasManual");
